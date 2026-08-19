@@ -315,8 +315,12 @@
 .urCardStats {
   flex: 1 1 320px;
   max-width: 620px;
-  font-family: var(--font-body);
-  font-weight: 500;
+  /* `--font-body` (Paytone One) is a chunky display face with only one
+     weight loaded — `font-weight` can't thin it out. Switched to
+     `--font-caption` (Elms Sans), a visibly thinner face, per explicit
+     ask to make this block read lighter — same choice already made for
+     case-study description paragraphs (CaseStudyPage.module.css). */
+  font-family: var(--font-caption);
   font-size: clamp(18px, 1.7vw, 32px);
   line-height: 1.5;
 }
