@@ -1,9 +1,16 @@
-/* No `overflow: hidden` — the ribbon bands intentionally spill past
-   this section's own top/bottom edge (see `.ribbon`). Horizontal bleed
-   from the oversized bands/peak is caught by `body`'s global
-   `overflow-x: hidden` in global.css instead. */
+/* `overflow-x: hidden` only (not the shorthand `overflow`) — the ribbon
+   bands intentionally spill past this section's own TOP/BOTTOM edge (see
+   `.ribbon`), which must stay uncropped; only the horizontal bleed needs
+   containing. This used to be handled by a global `overflow-x: hidden`
+   on `html` in global.css, which worked but had a real side effect: any
+   non-`visible` overflow on `html` breaks Hero's `position: sticky` (its
+   scroll-pin stopped clamping partway through, leaving a visible gap
+   before About — see the long comment on `html` in global.css). `.work`
+   is a sibling of Hero, not an ancestor, so clipping here can't affect
+   Hero's sticky positioning at all. */
 .work {
   position: relative;
+  overflow-x: hidden;
 }
 
 /* ---------- Ribbon divider ("WORK.../ARE YOU READY?") ----------

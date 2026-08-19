@@ -10,16 +10,21 @@
 
 html {
   scroll-behavior: smooth;
-  /* The real clip for intentional horizontal bleed (Work section's
-     diagonal ribbon bands, ink splats, etc.) — `body`'s own
-     `overflow-x: hidden` below was assumed to be enough (see the comment
-     on `.work` in Work.module.css) but isn't reliably propagated to the
-     viewport by every mobile browser; confirmed live on a real phone as
-     genuine page-level horizontal scroll (`document.documentElement`
-     `.scrollWidth` exceeding `.clientWidth`), not just a visual clip
-     miss. `overflow-x` on `html` itself is never propagated away, so
-     this is the one that actually has to carry it. */
-  overflow-x: hidden;
+  /* Deliberately NOT `overflow-x: hidden` here, even though this was the
+     most reliable fix for real mobile horizontal-scroll bleed (see git
+     history) — any non-`visible` overflow on `html` itself breaks
+     `position: sticky` for Hero. Confirmed directly: with it set, Hero's
+     sticky pin stopped clamping to the viewport top partway through its
+     scroll range, rendering Hero as a plain top-anchored 100vh block
+     instead — the `.heroStage` wrapper still reserved its full 170vh, so
+     the unfilled remainder showed as a real gap of `body`'s cream
+     background between Hero and About. `body`'s own `overflow-x: hidden`
+     below does NOT have this side effect (only `html`'s does), but on
+     its own isn't reliably propagated to the viewport on real mobile
+     browsers either — the actual fix for the bleed this was covering is
+     now a local `overflow-x: hidden` on `.work` itself (Work.module.css),
+     which sits AFTER Hero as a sibling, not an ancestor, so it can't
+     interfere with Hero's sticky positioning at all. */
 }
 
 body {

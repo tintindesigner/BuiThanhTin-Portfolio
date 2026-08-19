@@ -53,13 +53,22 @@ export default function Navbar({ activeId = 'home' }: NavbarProps) {
   const { onMouseMove: handleMouseMove, onMouseLeave: handleMouseLeave } = useCursorTilt()
   const isMobile = useMediaQuery('(max-width: 767px)')
 
-  // Mobile bottom tab bar: hidden until the user scrolls UP, and only
-  // ever eligible to show once they've scrolled to (or past) About — the
-  // top of `/` is Hero's own full-bleed scene with its own big "CLICK TO
-  // UNBOX" call-to-action, which a persistent bottom bar would clutter.
-  // Pages with no `#about` at all (case-study pages) have no such
-  // exclusion zone, so they're eligible from the start — only the scroll-
-  // direction condition applies there.
+  // Mobile: the top bar stays `position: fixed` (back to how it always
+  // was — the earlier `absolute`/scrolls-away experiment kept causing a
+  // visible Hero->About gap that never fully resolved) but shrinks down
+  // to a thin color sliver once scrolled past Hero, instead of moving
+  // out of the way by leaving the viewport — explicit ask ("thu nhỏ lại
+  // còn 1 mảnh màu tím"). Logo/hamburger fade out with it; scrolling
+  // back up past that same boundary grows it back to full size. Only
+  // applies on `/` (there's no Hero to shrink away from on a case-study
+  // page — `aboutEl` is null there, so `pastHero` just stays false).
+  //
+  // The bottom tab bar shares the same "past Hero" boundary for its own
+  // eligibility (hidden until scrolled UP, and only ever eligible once
+  // scrolled to/past About — Hero's own big "CLICK TO UNBOX" CTA would
+  // otherwise be cluttered by a persistent bottom bar) — computed in the
+  // same scroll handler since both read the same geometry.
+  const [navShrunk, setNavShrunk] = useState(false)
   const [barVisible, setBarVisible] = useState(false)
   const lastScrollYRef = useRef(0)
 
@@ -74,7 +83,10 @@ export default function Navbar({ activeId = 'home' }: NavbarProps) {
         const y = window.scrollY
         const last = lastScrollYRef.current
         const aboutEl = document.getElementById('about')
-        const eligible = !aboutEl || y >= aboutEl.getBoundingClientRect().top + y
+        const pastHero = aboutEl ? y >= aboutEl.getBoundingClientRect().top + y : false
+        setNavShrunk(pastHero)
+        if (pastHero) setMenuOpen(false)
+        const eligible = !aboutEl || pastHero
         if (!eligible) {
           setBarVisible(false)
         } else if (y < last - 4) {
@@ -160,7 +172,7 @@ export default function Navbar({ activeId = 'home' }: NavbarProps) {
 
   return (
     <>
-      <nav className={styles.nav} aria-label="Site">
+      <nav className={styles.nav} data-shrunk={isMobile && navShrunk} aria-label="Site">
         <div className={styles.navTopRow}>
           <a
             href="/"

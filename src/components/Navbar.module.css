@@ -10,24 +10,24 @@
   border-radius: 0 0 48px 48px;
   background: var(--dark-violet);
   isolation: isolate;
+  transition: border-radius 0.3s ease;
 }
 
-/* Mobile: no longer pinned, so it scrolls away with the page like a
-   normal header, and thinner (2/3 of --nav-height) — explicit ask, size
-   + scroll behavior only, nothing else changed (still has the hamburger
-   dropdown, still the same rounded-bottom shape as desktop).
-   `position: absolute`, not `static` — unlike `fixed`, an absolutely-
-   positioned element with no positioned ancestor is anchored to the
-   document itself and scrolls out of view normally as the page scrolls,
-   but unlike `static` it's still taken OUT of normal flow, so it doesn't
-   push Hero/About/Work/Contact down. `static` was tried first and caused
-   a real regression: it pushes `.heroStage` down by this bar's own
-   height, and Hero's sticky/ScrollTrigger math (tuned assuming nothing
-   sits above Hero) doesn't account for that — confirmed live as a
-   visible gap opening up between Hero and About. */
+/* Mobile, past Hero: shrinks down to a thin color sliver instead of
+   scrolling away — explicit ask, after an earlier `position: absolute`
+   (scrolls away entirely) attempt kept causing a Hero->About gap that
+   traced back to Hero's own sticky/ScrollTrigger math never accounting
+   for anything living above Hero. Staying `fixed` (unchanged) sidesteps
+   that whole class of bug — this variant never touches layout at all,
+   it's a pure visual shrink of a fixed element. Logo/hamburger fade with
+   it (see `.navTopRow` below); growing back is just the reverse
+   transition once scrolled back up above that boundary (`Navbar.tsx`'s
+   `navShrunk`, only ever true on `/` — no Hero to shrink away from on a
+   case-study page). Square corners while shrunk — 48px rounding on an
+   8px sliver would read as broken, not intentional. */
 @media (max-width: 767px) {
-  .nav {
-    position: absolute;
+  .nav[data-shrunk='true'] {
+    border-radius: 0;
   }
 }
 
@@ -46,6 +46,19 @@
 @media (max-width: 767px) {
   .navTopRow {
     height: calc(var(--nav-height) * 2 / 3);
+    overflow: hidden;
+    transition: height 0.3s ease;
+  }
+
+  .nav[data-shrunk='true'] .navTopRow {
+    height: 8px;
+  }
+
+  .nav[data-shrunk='true'] .navTopRow .logoLink,
+  .nav[data-shrunk='true'] .navTopRow .hamburger {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
   }
 }
 
