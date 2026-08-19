@@ -276,12 +276,15 @@
   }
 }
 
-/* Mobile bottom tab bar — app-style: fixed to the viewport (not `.nav`'s
-   flow, which scrolled away above), always showing all 4 destinations
-   directly rather than behind a hamburger toggle. `translateY` (not
-   `display`) drives the show/hide so the slide transition below actually
-   has something to animate — Navbar.tsx toggles `data-visible` based on
-   scroll direction + an eligibility check (not shown before About). */
+/* Mobile bottom tab bar — app-style: fixed to the viewport, always
+   showing all 4 destinations directly, no toggle needed. Coexists with
+   `.nav`'s own hamburger dropdown above (that one shrinks away past
+   Hero — see `.nav[data-shrunk]` — so in practice only one of the two
+   is ever the reachable nav control at a given scroll position, but
+   both stay mounted). `translateY` (not `display`) drives the show/hide
+   so the slide transition below actually has something to animate —
+   Navbar.tsx toggles `data-visible` based on scroll direction + an
+   eligibility check (not shown before About). */
 .mobileTabBar {
   position: fixed;
   left: 0;

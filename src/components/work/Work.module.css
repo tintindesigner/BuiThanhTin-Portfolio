@@ -153,9 +153,12 @@
   scroll-margin-top: calc(var(--nav-height) + 24px);
 }
 
-/* Navbar is no longer fixed on mobile (see Navbar.module.css) — it
-   scrolls away with the page instead of overlaying this title, so only
-   the plain breathing-room amount is needed here too. */
+/* Navbar is still `position: fixed` on mobile (see Navbar.module.css),
+   but by the time this jump is reachable at all (clicking a badge on
+   About implies already having scrolled past Hero), it's already
+   shrunk down to its 8px "past Hero" sliver — comfortably covered by
+   the plain 24px breathing-room amount alone, no full-height term
+   needed here. */
 @media (max-width: 767px) {
   .category {
     scroll-margin-top: 24px;
