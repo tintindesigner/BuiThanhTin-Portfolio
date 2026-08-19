@@ -40,6 +40,7 @@ interface NavbarProps {
 }
 
 export default function Navbar({ activeId = 'home' }: NavbarProps) {
+  const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
   const onHomePage = location.pathname === '/'
@@ -112,13 +113,19 @@ export default function Navbar({ activeId = 'home' }: NavbarProps) {
   // anchor-scroll trouble for `#home` itself (see goHome above), and
   // that same layout quirk turned out to throw off anchor-scroll to
   // the OTHER sections too on a fresh page load, not just `#home`.
-  const renderLink = (id: string, label: string, iconOnly = false) => (
+  const renderLink = (
+    id: string,
+    label: string,
+    opts?: { mobileDropdown?: boolean; iconHome?: boolean },
+  ) => (
     <div className={styles.linkItem} data-active={activeId === id} key={id}>
       <a
         href={onHomePage ? `#${id}` : '/'}
         className={styles.linkButton}
-        aria-label={iconOnly && id === 'home' ? label : undefined}
+        tabIndex={opts?.mobileDropdown && !menuOpen ? -1 : undefined}
+        aria-label={opts?.iconHome && id === 'home' ? label : undefined}
         onClick={(e) => {
+          setMenuOpen(false)
           if (onHomePage) {
             if (id === 'home') goHome(e)
             return
@@ -145,7 +152,7 @@ export default function Navbar({ activeId = 'home' }: NavbarProps) {
             </div>
           </div>
         </span>
-        <span className={styles.linkLabel}>{iconOnly && id === 'home' ? <HomeIcon /> : label}</span>
+        <span className={styles.linkLabel}>{opts?.iconHome && id === 'home' ? <HomeIcon /> : label}</span>
         <span className={styles.underline} aria-hidden="true" />
       </a>
     </div>
@@ -176,12 +183,34 @@ export default function Navbar({ activeId = 'home' }: NavbarProps) {
               {LINKS.map((l) => renderLink(l.id, l.label))}
             </div>
           )}
+
+          <button
+            type="button"
+            className={styles.hamburger}
+            data-open={menuOpen}
+            aria-label="Toggle menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
         </div>
+
+        {/* Grows the SAME bar downward when open (max-height transition on
+            this element; .nav has no fixed height of its own, so it just
+            follows) rather than showing a separate panel below the bar. */}
+        {isMobile && (
+          <div className={styles.mobileLinks} data-open={menuOpen}>
+            {LINKS.map((l) => renderLink(l.id, l.label, { mobileDropdown: true }))}
+          </div>
+        )}
       </nav>
 
       {isMobile && (
         <nav className={styles.mobileTabBar} data-visible={barVisible} aria-label="Mobile navigation">
-          {LINKS.map((l) => renderLink(l.id, l.label, true))}
+          {LINKS.map((l) => renderLink(l.id, l.label, { iconHome: true }))}
         </nav>
       )}
     </>

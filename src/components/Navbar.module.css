@@ -12,23 +12,22 @@
   isolation: isolate;
 }
 
-/* Mobile: no longer carries navigation (that's `.mobileTabBar` below) —
-   just the logo — and no longer pinned, so it scrolls away with the page
-   like a normal header. `position: absolute`, not `static` — unlike
-   `fixed`, an absolutely-positioned element with no positioned ancestor
-   is anchored to the document itself and scrolls out of view normally
-   as the page scrolls, but unlike `static` it's still taken OUT of
-   normal flow, so it doesn't push Hero/About/Work/Contact down. `static`
-   was tried first and caused a real regression: it pushes `.heroStage`
-   down by this bar's own height, and Hero's sticky/ScrollTrigger math
-   (tuned assuming nothing sits above Hero) doesn't account for that —
-   confirmed live as a visible gap opening up between Hero and About.
-   Also thinner (2/3 of --nav-height) and a plain rectangle (no
-   border-radius) instead of the desktop shape — explicit ask. */
+/* Mobile: no longer pinned, so it scrolls away with the page like a
+   normal header, and thinner (2/3 of --nav-height) — explicit ask, size
+   + scroll behavior only, nothing else changed (still has the hamburger
+   dropdown, still the same rounded-bottom shape as desktop).
+   `position: absolute`, not `static` — unlike `fixed`, an absolutely-
+   positioned element with no positioned ancestor is anchored to the
+   document itself and scrolls out of view normally as the page scrolls,
+   but unlike `static` it's still taken OUT of normal flow, so it doesn't
+   push Hero/About/Work/Contact down. `static` was tried first and caused
+   a real regression: it pushes `.heroStage` down by this bar's own
+   height, and Hero's sticky/ScrollTrigger math (tuned assuming nothing
+   sits above Hero) doesn't account for that — confirmed live as a
+   visible gap opening up between Hero and About. */
 @media (max-width: 767px) {
   .nav {
     position: absolute;
-    border-radius: 0;
   }
 }
 
@@ -203,6 +202,65 @@
 
 .linkItem[data-active='true'] .underline {
   transform: scaleX(1);
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  width: 32px;
+  padding: 8px 4px;
+}
+
+.hamburger span {
+  display: block;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--ink-yellow);
+  transition: transform 0.25s ease, opacity 0.2s ease;
+}
+
+.hamburger[data-open='true'] span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+.hamburger[data-open='true'] span:nth-child(2) {
+  opacity: 0;
+}
+.hamburger[data-open='true'] span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+.mobileLinks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-height: 0;
+  padding: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition:
+    max-height 0.3s ease,
+    padding 0.3s ease,
+    opacity 0.2s ease;
+}
+
+.mobileLinks[data-open='true'] {
+  max-height: 420px;
+  padding: 8px 0 28px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobileLinks .linkButton {
+  font-size: 20px;
+}
+
+@media (max-width: 767px) {
+  .hamburger {
+    display: flex;
+  }
 }
 
 /* Mobile bottom tab bar — app-style: fixed to the viewport (not `.nav`'s
