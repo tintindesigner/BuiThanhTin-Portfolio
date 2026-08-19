@@ -112,17 +112,32 @@
    cleanly with no mismatched matte edge. */
 .rider {
   position: absolute;
-  bottom: 50%;
+  /* `top: 0`, not a `bottom` anchor — paired with the transform below,
+     this pins the artwork's own REAR WHEEL (mid-wheelie, doing a stoppie
+     onto its back tire — not the image's geometric center) to sit right
+     on the bar's top edge, like it's actually riding along it. Measured
+     directly against the source art: the wheel's ground-contact point
+     sits at roughly (37%, 93%) of the image's own bounding box, so a
+     translate by that same amount moves exactly that point onto (left,
+     top:0) instead of centering the whole image there. */
+  top: 0;
   width: 68px;
   height: auto;
-  transform: translate(-58%, 38%);
+  transform: translate(-37%, -93%);
   transition: left 0.15s linear;
   pointer-events: none;
 }
 
 .loadingText {
   font-family: var(--font-display);
-  font-size: var(--h3-size);
+  /* `var(--h3-size)` alone (fixed 32px) rendered "LOADING...." at ~39% of
+     a mobile viewport's width — confirmed too big live. `3.5vw` targets
+     the requested ~20% instead (derived from this string's actual
+     measured width-per-font-size ratio, not guessed), naturally ceilings
+     at exactly `--h3-size` for any viewport ≥914px wide (so desktop is a
+     no-op, same as before), and floors at 16px so very narrow phones
+     don't shrink it past readable. */
+  font-size: clamp(16px, 3.5vw, var(--h3-size));
   line-height: var(--h3-line-height);
   color: var(--cream);
   margin: 0;

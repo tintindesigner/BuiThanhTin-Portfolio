@@ -356,15 +356,22 @@
 .battleHistoryInk {
   position: absolute;
   left: 28.23%;
-  /* Nudged up from -11.2% per explicit ask ("xích lên align ngang với
-     text") — live measurement at mobile width actually showed the ink's
-     own center already slightly ABOVE the "BATTLE HISTORY" title's
-     center (by ~19px), so this shift is taken on faith from the user's
-     direct visual read rather than re-derived from that measurement;
-     revisit if it still doesn't read as level. */
-  top: -15%;
+  /* `top:0` (same anchor `.sectionTitle` itself uses) + a `translateY`
+     expressed as a % of THIS ELEMENT'S OWN height, not the old `top:-15%`
+     (a % of `.battleHistory`'s TOTAL height, which includes the row list
+     below). That total height changes whenever the row list's own text
+     wraps differently (it did — twice now, per the two tuning notes this
+     replaced), silently drifting the ink out of alignment with the title
+     even though nothing about the title itself moved. Anchoring both to
+     the same `top:0` reference point makes this immune to that: the ink
+     stays level with the title regardless of how tall the rows below
+     render. Re-measured live via getBoundingClientRect (desktop 1280px:
+     title center vs ink center) rather than reused from the old value.
+     If it ever needs revisiting, remeasure the SAME way — don't hand-tune
+     by eye against a screenshot, that's what drifted last time. */
+  top: 0;
   width: 22.38%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -37.3%);
   pointer-events: none;
 }
 
@@ -523,18 +530,15 @@
     width: 22%;
   }
 
-  /* Desktop's left:28.23%/top:-15% was derived from Figma's fixed-canvas
-     offset and only ever verified against the title's OLD fixed 48px
-     font-size. The later `.sectionTitle` clamp(28px,9vw,48px) fix (see
-     project memory) shrinks "BATTLE HISTORY" a lot more on mobile than
-     the container itself shrinks, so the two drifted apart — the ink
-     splash floated above-left of the text instead of sitting behind/
-     level with it. Re-measured live against the title's ACTUAL mobile
-     rect (getBoundingClientRect at 375px) instead of reusing the
-     desktop-derived %s. */
+  /* Same `top:0` + own-height `translateY` fix as the desktop rule above
+     (see its comment) — mobile keeps its own left/width/Y values since
+     the title:ink size ratio differs from desktop's, but needed its own
+     `transform` override too so it doesn't inherit desktop's Y%.
+     Re-measured live at 470px width (this pane's mobile viewport). */
   .battleHistoryInk {
     left: 15%;
-    top: -27%;
+    top: 0;
     width: 67.14%;
+    transform: translate(-50%, -40.9%);
   }
 }
