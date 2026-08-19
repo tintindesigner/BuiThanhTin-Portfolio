@@ -2,7 +2,7 @@ import { forwardRef, useImperativeHandle, useLayoutEffect, useRef, useState } fr
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { playSquashBounce, resetSquashBounce } from '../../lib/bounce'
-import { categoryId } from '../../lib/categoryId'
+import { categoryId, CATEGORY_LABELS } from '../../lib/categoryId'
 import AdvertisingIcon from '../../assets/svg/advertising-icon.svg?react'
 import AiGenerativeIcon from '../../assets/svg/ai-generative-icon.svg?react'
 import MotionGraphicIcon from '../../assets/svg/motion-graphic-icon.svg?react'
@@ -21,9 +21,9 @@ import styles from './About.module.css'
 gsap.registerPlugin(ScrollTrigger)
 
 const BATTLE_HISTORY = [
-  { years: '2018-2019', role: 'Graphic Designer', company: 'Cty TNHH MTV XNK Thai Viet' },
+  { years: '2018-2019', role: 'Junior Graphic Designer', company: 'Cty TNHH MTV XNK Thái Việt' },
   { years: '2019-2020', role: 'Graphic Designer', company: 'Cty CP TP Hoding' },
-  { years: '2020-2026', role: 'Graphic Designer', company: 'Cty CP Goody Group' },
+  { years: '2020-2026', role: 'Senior Graphic Designer & Motion Designer', company: 'Cty CP Goody Group' },
 ]
 
 // Index order matches JSX below (Advertising, AI, Motion, Photoshoot).
@@ -35,7 +35,12 @@ const BADGE_FROM_LEFT = [true, false, true, false]
 // Generative points at the same "ADVERTISING" category as the first
 // badge — Work has no separate AI category of its own; that job (AI KV
 // Star Kombucha) is filed under Advertising there.
-const BADGE_CATEGORY = ['ADVERTISING', 'ADVERTISING', 'MOTION GRAPHIC & CLIP', 'PRODUCT SHOOTING']
+const BADGE_CATEGORY = [
+  CATEGORY_LABELS.advertising,
+  CATEGORY_LABELS.advertising,
+  CATEGORY_LABELS.motionGraphic,
+  CATEGORY_LABELS.productShooting,
+]
 
 export interface AboutHandle {
   /** Plays the FIGURE X1 entrance immediately, if it hasn't already. Called

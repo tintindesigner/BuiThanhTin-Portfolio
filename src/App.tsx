@@ -14,6 +14,27 @@ import LoadingScreen from './components/LoadingScreen'
 // clicking Home from a case-study page shouldn't re-block on a screen the
 // box model has already finished loading for.
 const LOADING_SHOWN_KEY = 'tt-loading-shown'
+
+// sessionStorage access can throw (Safari private mode with strict cookie
+// blocking, some enterprise policies/privacy extensions) — guarded so a
+// blocked read can't crash Home's very first render, and a blocked write
+// can't skip `setShowLoading(false)` right after it (which would leave the
+// already-invisible loading overlay permanently blocking clicks).
+function readLoadingShown() {
+  try {
+    return sessionStorage.getItem(LOADING_SHOWN_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+function markLoadingShown() {
+  try {
+    sessionStorage.setItem(LOADING_SHOWN_KEY, '1')
+  } catch {
+    // Storage unavailable — worst case the loading screen shows again on
+    // the next visit this session, which is harmless.
+  }
+}
 // After the loading screen's own fade-out finishes, wait this long before
 // starting the box's bounce-in — playing it any earlier (e.g. the instant
 // the model itself is ready) means it plays out WHILE still hidden behind
@@ -26,7 +47,7 @@ function Home() {
   const heroRef = useRef<HeroHandle>(null)
   const location = useLocation()
 
-  const [showLoading, setShowLoading] = useState(() => sessionStorage.getItem(LOADING_SHOWN_KEY) !== '1')
+  const [showLoading, setShowLoading] = useState(() => !readLoadingShown())
   const [heroReady, setHeroReady] = useState(false)
   // No loading screen this mount (a revisit within the same session) —
   // nothing is covering Hero, so the box entrance can auto-play the
@@ -37,7 +58,7 @@ function Home() {
     if (!showLoading) heroRef.current?.playEntrance()
   }
   const handleLoadingDone = () => {
-    sessionStorage.setItem(LOADING_SHOWN_KEY, '1')
+    markLoadingShown()
     setShowLoading(false)
     window.setTimeout(() => heroRef.current?.playEntrance(), POST_LOADING_ENTRANCE_DELAY_MS)
   }

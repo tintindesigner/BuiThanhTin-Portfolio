@@ -6,6 +6,7 @@ import MenuHover from '../assets/svg/menu-hover.svg?react'
 import StripedBackground from './StripedBackground'
 import { HOVER_CHIP_CLIP_PATH } from './hoverChipGeometry'
 import { useCursorTilt } from '../hooks/useCursorTilt'
+import { useMediaQuery } from '../hooks/useMediaQuery'
 import styles from './Navbar.module.css'
 
 const LINKS = [
@@ -31,6 +32,14 @@ export default function Navbar({ activeId = 'home' }: NavbarProps) {
   // `transform` shorthand) so this transitions on its own fast timing,
   // independent of the slower elastic `scale` pop-in on the same element.
   const { onMouseMove: handleMouseMove, onMouseLeave: handleMouseLeave } = useCursorTilt()
+  // Only one of `.links`/`.mobileLinks` is ever visible at a time (CSS
+  // hides the other via display:none/max-height, same 767px breakpoint as
+  // the hamburger switch below) — rendering both unconditionally used to
+  // mean 8 always-on `StripedBackground` hover-chips (4 per variant), each
+  // running its own independent rAF loop, with half of them permanently
+  // wasted on every single page load. Only mounting the actually-visible
+  // variant halves that to 4.
+  const isMobile = useMediaQuery('(max-width: 767px)')
 
   // `mobile` links are only ever visually reachable while the panel is
   // open (CSS hides it otherwise via max-height/opacity, not display:none),
@@ -118,9 +127,11 @@ export default function Navbar({ activeId = 'home' }: NavbarProps) {
           <Logo className={styles.logo} />
         </a>
 
-        <div className={styles.links}>
-          {LINKS.map((l) => renderLink(l.id, l.label))}
-        </div>
+        {!isMobile && (
+          <div className={styles.links}>
+            {LINKS.map((l) => renderLink(l.id, l.label))}
+          </div>
+        )}
 
         <button
           type="button"
@@ -139,9 +150,11 @@ export default function Navbar({ activeId = 'home' }: NavbarProps) {
       {/* Grows the SAME bar downward when open (max-height transition on
           this element; .nav has no fixed height of its own, so it just
           follows) rather than showing a separate panel below the bar. */}
-      <div className={styles.mobileLinks} data-open={menuOpen}>
-        {LINKS.map((l) => renderLink(l.id, l.label, true))}
-      </div>
+      {isMobile && (
+        <div className={styles.mobileLinks} data-open={menuOpen}>
+          {LINKS.map((l) => renderLink(l.id, l.label, true))}
+        </div>
+      )}
     </nav>
   )
 }

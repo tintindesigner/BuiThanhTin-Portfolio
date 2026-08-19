@@ -1,4 +1,4 @@
-import { Suspense, forwardRef, lazy, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react'
+import { Suspense, forwardRef, lazy, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import Burst from '../../assets/svg/burst-icon.svg?react'
 import BuyOneGetAll from '../../assets/svg/buy-1-get-all.svg?react'
@@ -58,6 +58,25 @@ const HeroDecor = forwardRef<HeroDecorHandle, HeroDecorProps>(function HeroDecor
   // actually plays the 3D box's Y-axis spin, kept in sync with this same
   // DOM entrance rather than firing whenever the model happens to load.
   const [entranceTriggered, setEntranceTriggered] = useState(false)
+  // Threaded down to BoxScene as `entranceSettled` — its false→true edge
+  // is the REAL signal that this element's own squash/settle sequence has
+  // finished, fired via `tl.call()` at the exact point in the timeline
+  // (see below), so BoxScene's idle wobble can start from an actual
+  // completion event instead of a separately-guessed timeout duration
+  // that has to be hand-kept in sync with this timeline's own durations.
+  const [entranceSettled, setEntranceSettled] = useState(false)
+  // The idle "nhún nhún" tween is `repeat:-1` (infinite) — unlike every
+  // other tween `startBoxEntrance` creates, it never finishes on its own,
+  // so it must be explicitly killed on unmount or it keeps ticking against
+  // a detached DOM node forever once this component unmounts (e.g.
+  // navigating from Home to a `/work/:slug` page mid-idle-pulse).
+  const idlePulseTweenRef = useRef<gsap.core.Tween | null>(null)
+
+  useEffect(() => {
+    return () => {
+      idlePulseTweenRef.current?.kill()
+    }
+  }, [])
 
   useImperativeHandle(ref, () => ({
     pulseBox: () => {
@@ -150,6 +169,12 @@ const HeroDecor = forwardRef<HeroDecorHandle, HeroDecorProps>(function HeroDecor
       duration: 0.3,
       ease: 'back.out(2.4)',
     })
+    // Fires the instant this element's own 3 tweens above finish (real
+    // signal, not a guessed duration) — BoxScene uses this false→true edge
+    // to start the 3D idle wobble in sync with the DOM settle, instead of
+    // a separately hand-tuned `setTimeout` that silently drifts whenever
+    // this timeline's own durations change.
+    tl.call(() => setEntranceSettled(true))
 
     // Everything else (click-prompt, burst + its ink splat, buy1getall,
     // badges) is appended to this SAME timeline, so it only starts once
@@ -210,7 +235,7 @@ const HeroDecor = forwardRef<HeroDecorHandle, HeroDecorProps>(function HeroDecor
     // place.
     if (unboxRef.current) {
       tl.call(() => {
-        gsap.to(unboxRef.current, {
+        idlePulseTweenRef.current = gsap.to(unboxRef.current, {
           scale: 1.12,
           duration: 0.55,
           repeat: -1,
@@ -239,7 +264,7 @@ const HeroDecor = forwardRef<HeroDecorHandle, HeroDecorProps>(function HeroDecor
         <div className={styles.boxEntrance} ref={boxEntranceRef}>
           <div className={styles.boxCanvasHost}>
             <Suspense fallback={null}>
-              <BoxScene onReady={handleModelReady} playSpin={entranceTriggered} />
+              <BoxScene onReady={handleModelReady} playSpin={entranceTriggered} entranceSettled={entranceSettled} />
             </Suspense>
           </div>
         </div>

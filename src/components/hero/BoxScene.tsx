@@ -4,7 +4,15 @@ import { useGLTF } from '@react-three/drei'
 import gsap from 'gsap'
 import * as THREE from 'three'
 
-function BoxModel({ onReady, playSpin }: { onReady?: () => void; playSpin: boolean }) {
+function BoxModel({
+  onReady,
+  playSpin,
+  entranceSettled,
+}: {
+  onReady?: () => void
+  playSpin: boolean
+  entranceSettled: boolean
+}) {
   const { scene } = useGLTF('/models/box.glb')
   const { camera, size } = useThree()
   const idleTweenRef = useRef<gsap.core.Tween | null>(null)
@@ -13,6 +21,7 @@ function BoxModel({ onReady, playSpin }: { onReady?: () => void; playSpin: boole
   const readyFiredRef = useRef(false)
   const readyTimeoutRef = useRef<number | null>(null)
   const spinPlayedRef = useRef(false)
+  const idleWobbleStartedRef = useRef(false)
 
   // Frame the box tightly for this exact camera angle. A bounding-SPHERE
   // fit (the previous approach) has to leave enough room for the box to
@@ -151,14 +160,25 @@ function BoxModel({ onReady, playSpin }: { onReady?: () => void; playSpin: boole
   // HeroDecor — a squash/stretch + translate there reads the same as it
   // would here, without needing camera headroom for the flight. This 3D
   // object just starts its gentle idle wobble once that lands.
+  // `entranceSettled`'s false→true edge is a REAL completion signal fired
+  // by HeroDecor's own timeline (`tl.call()` right after its 3 settle
+  // tweens) — previously this fired off a guessed `setTimeout(…, 980)`
+  // that had to be hand-kept in sync with HeroDecor's actual durations
+  // (which summed to 1050ms, not 980ms — the wobble was starting ~70ms
+  // before the DOM settle tween had actually finished, visibly fighting
+  // it for a moment on every load).
   useEffect(() => {
-    const t = setTimeout(startIdleWobble, 980)
+    if (!entranceSettled || idleWobbleStartedRef.current) return
+    idleWobbleStartedRef.current = true
+    startIdleWobble()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entranceSettled])
+
+  useEffect(() => {
     return () => {
-      clearTimeout(t)
       idleTweenRef.current?.kill()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scene])
+  }, [])
 
   // Ambient tilt: the box leans toward the cursor wherever it is on the
   // page — a real 3D rotation of the mesh, not a flat-image CSS skew.
@@ -211,9 +231,13 @@ interface BoxSceneProps {
    *  same moment the DOM bounce entrance actually starts (not whenever
    *  the model happens to finish loading), so the two stay in sync. */
   playSpin: boolean
+  /** False→true edge starts the idle wobble — set this once the DOM
+   *  entrance's own squash/settle sequence has actually finished, so the
+   *  two don't visibly fight each other for a moment. */
+  entranceSettled: boolean
 }
 
-export default function BoxScene({ onReady, playSpin }: BoxSceneProps) {
+export default function BoxScene({ onReady, playSpin, entranceSettled }: BoxSceneProps) {
   return (
     <Canvas
       camera={{ position: [0, 2, 22], fov: 35 }}
@@ -234,7 +258,7 @@ export default function BoxScene({ onReady, playSpin }: BoxSceneProps) {
       <directionalLight position={[6, 10, 8]} intensity={1.8} />
       <directionalLight position={[-8, 4, -6]} intensity={0.7} />
       <directionalLight position={[0, -6, 10]} intensity={0.5} />
-      <BoxModel onReady={onReady} playSpin={playSpin} />
+      <BoxModel onReady={onReady} playSpin={playSpin} entranceSettled={entranceSettled} />
     </Canvas>
   )
 }

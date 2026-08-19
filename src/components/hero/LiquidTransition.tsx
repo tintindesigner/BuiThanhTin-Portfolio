@@ -37,6 +37,23 @@ export default forwardRef<LiquidTransitionHandle>(function LiquidTransition(_pro
   const overlayRef = useRef<SVGGElement>(null)
   const waveGroupRef = useRef<SVGGElement>(null)
   const displaceRef = useRef<SVGFEOffsetElement>(null)
+  // `play()` starts an rAF loop + an infinite `repeat:-1` tween that are
+  // both normally only ever stopped from the rise tween's own `onComplete`
+  // — tracked here too so an unmount effect can stop them even if the
+  // component unmounts mid-rise (e.g. a browser-history navigation away
+  // from `/` during the ~1s transition), which would otherwise leave them
+  // running forever against a detached SVG node.
+  const wobbleRafRef = useRef(0)
+  const jiggleTweenRef = useRef<gsap.core.Tween | null>(null)
+  const riseTweenRef = useRef<gsap.core.Tween | null>(null)
+
+  useEffect(() => {
+    return () => {
+      cancelAnimationFrame(wobbleRafRef.current)
+      jiggleTweenRef.current?.kill()
+      riseTweenRef.current?.kill()
+    }
+  }, [])
 
   // Scrolling stripe pattern — same rAF-driven `patternTransform`
   // technique as StripedBackground (see that file for why: SMIL/CSS
@@ -85,22 +102,21 @@ export default forwardRef<LiquidTransitionHandle>(function LiquidTransition(_pro
         // translating," per explicit feedback) — both the displacement
         // amplitude here and `scale` on the filter below.
         // Frequencies tuned against the 1000ms rise window.
-        let wobbleRaf = 0
         const wobbleStart = performance.now()
         const tickWobble = (now: number) => {
           const elapsed = (now - wobbleStart) / 1000
           displaceRef.current?.setAttribute('dx', String(Math.sin(elapsed * 5) * 90))
           displaceRef.current?.setAttribute('dy', String(elapsed * 120))
-          wobbleRaf = requestAnimationFrame(tickWobble)
+          wobbleRafRef.current = requestAnimationFrame(tickWobble)
         }
-        wobbleRaf = requestAnimationFrame(tickWobble)
+        wobbleRafRef.current = requestAnimationFrame(tickWobble)
 
         // Squash/stretch on top of the rise — the SHAPE itself jiggles
         // (wider+shorter, then narrower+taller, alternating) as it moves,
         // like gelatin, not just a rigid translate. `transformOrigin`
         // pinned to the bottom so the squash reads as the mass wobbling
         // while its base stays put, not the whole thing sliding sideways.
-        const jiggle = gsap.to(waveGroupRef.current, {
+        jiggleTweenRef.current = gsap.to(waveGroupRef.current, {
           scaleX: 1.035,
           scaleY: 0.965,
           duration: 0.22,
@@ -109,13 +125,13 @@ export default forwardRef<LiquidTransitionHandle>(function LiquidTransition(_pro
           yoyo: true,
         })
 
-        gsap.to(waveGroupRef.current, {
+        riseTweenRef.current = gsap.to(waveGroupRef.current, {
           y: RISE_TO_Y,
           duration: RISE_DURATION,
           ease: 'power3.out',
           onComplete: () => {
-            cancelAnimationFrame(wobbleRaf)
-            jiggle.kill()
+            cancelAnimationFrame(wobbleRafRef.current)
+            jiggleTweenRef.current?.kill()
             gsap.set(waveGroupRef.current, { scaleX: 1, scaleY: 1 })
             // Caller's scroll-snap runs SYNCHRONOUSLY inside onCovered —
             // by the time it returns, the jump has already happened, so

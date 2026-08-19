@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useParams, Navigate } from 'react-router-dom'
 import Navbar from '../Navbar'
@@ -105,8 +105,13 @@ export default function CaseStudyPage() {
 
   // Resets scroll on every navigation between case-study pages (incl.
   // via NEXT PROJECT) — react-router doesn't do this on its own since
-  // it's a client-side route change, not a real page load.
-  useEffect(() => {
+  // it's a client-side route change, not a real page load. `useLayoutEffect`,
+  // not `useEffect` — this route never remounts `CaseStudyPage` between
+  // slugs, so a plain `useEffect` would let the browser paint the new
+  // project's content at the OLD scrollY for one frame before jumping to
+  // (0,0), a visible flash (same bug class already fixed this way
+  // elsewhere in the project — see LoadingScreen/Lightbox).
+  useLayoutEffect(() => {
     window.scrollTo(0, 0)
   }, [slug])
 
@@ -180,7 +185,14 @@ export default function CaseStudyPage() {
           {study.description && <p className={styles.description}>{study.description}</p>}
 
           {study.sections.map((section, i) => (
-            <SectionBlock section={section} key={section.label ?? i} />
+            // Keyed by slug too, not just the section's own label/index —
+            // otherwise two DIFFERENT case studies whose sections happen to
+            // share a label (or both go unlabeled) at the same array
+            // position get treated as the SAME SectionBlock across a
+            // `/work/:slug` param change (this route never remounts
+            // CaseStudyPage), leaving stale state (e.g. an open Lightbox's
+            // `index`) pointed at the wrong study's shorter image list.
+            <SectionBlock section={section} key={`${slug}-${section.label ?? i}`} />
           ))}
         </article>
 

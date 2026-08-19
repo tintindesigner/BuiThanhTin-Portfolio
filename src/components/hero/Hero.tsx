@@ -105,7 +105,12 @@ const Hero = forwardRef<HeroHandle, HeroProps>(function Hero(
 
   useLayoutEffect(() => {
     if (skipIntro) {
-      triggeredRef.current = true
+      // Only the auto-scroll trigger is skipped here (no ScrollTrigger is
+      // created below) — `triggeredRef` must stay false so the box is
+      // still clickable afterward. Setting it true here used to
+      // permanently disable the click-to-transition path for the rest of
+      // this page's life, even though nothing was actually guarding
+      // against a duplicate ScrollTrigger fire (none was ever created).
       return
     }
     // `.hero`'s `position:sticky` naturally releases once scrollY passes

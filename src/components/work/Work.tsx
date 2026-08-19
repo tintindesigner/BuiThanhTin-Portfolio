@@ -6,7 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useCursorTilt } from '../../hooks/useCursorTilt'
 import { playSquashBounce, resetSquashBounce } from '../../lib/bounce'
-import { categoryId } from '../../lib/categoryId'
+import { categoryId, CATEGORY_LABELS } from '../../lib/categoryId'
 import GolinksIcon from '../../assets/svg/golinks-icon.svg?react'
 import Ink3 from '../../assets/svg/ink-3.svg?react'
 import SeeMoreArt from '../../assets/svg/see-more-hover.svg?react'
@@ -47,7 +47,7 @@ interface Category {
 
 const CATEGORIES: Category[] = [
   {
-    label: 'ADVERTISING',
+    label: CATEGORY_LABELS.advertising,
     jobs: [
       {
         image: advertisingLetsChill,
@@ -66,7 +66,7 @@ const CATEGORIES: Category[] = [
     ],
   },
   {
-    label: 'EVENT & POSM',
+    label: CATEGORY_LABELS.eventPosm,
     jobs: [
       {
         image: eventPosmNewLabels,
@@ -92,7 +92,7 @@ const CATEGORIES: Category[] = [
     ],
   },
   {
-    label: 'SOCIAL POST',
+    label: CATEGORY_LABELS.socialPost,
     wide: true,
     jobs: [
       {
@@ -106,7 +106,7 @@ const CATEGORIES: Category[] = [
     ],
   },
   {
-    label: 'MOTION GRAPHIC & CLIP',
+    label: CATEGORY_LABELS.motionGraphic,
     jobs: [
       {
         image: motionCelaTvc,
@@ -134,7 +134,7 @@ const CATEGORIES: Category[] = [
 ]
 
 const PRODUCT_SHOOTING: Category = {
-  label: 'PRODUCT SHOOTING',
+  label: CATEGORY_LABELS.productShooting,
   jobs: [
     {
       image: productCocktail,
