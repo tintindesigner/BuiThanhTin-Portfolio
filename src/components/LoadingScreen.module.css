@@ -112,18 +112,17 @@
    cleanly with no mismatched matte edge. */
 .rider {
   position: absolute;
-  /* `top: 0`, not a `bottom` anchor — paired with the transform below,
-     this pins the artwork's own REAR WHEEL (mid-wheelie, doing a stoppie
-     onto its back tire — not the image's geometric center) to sit right
-     on the bar's top edge, like it's actually riding along it. Measured
-     directly against the source art: the wheel's ground-contact point
-     sits at roughly (37%, 93%) of the image's own bounding box, so a
-     translate by that same amount moves exactly that point onto (left,
-     top:0) instead of centering the whole image there. */
-  top: 0;
+  /* Per the Figma source (node 105:268 desktop / 103:171 mobile,
+     confirmed by measuring both screenshots directly): the artwork's own
+     BOTTOM edge sits flush with the bar's bottom edge — not resting on
+     top of the bar. The character's lower half (legs, wheels) is inside
+     the bar's own height, only the torso/helmet poke up above it. A
+     plain `bottom: 0` gives exactly that, no need to target a specific
+     "wheel" point within the art. */
+  bottom: 0;
   width: 68px;
   height: auto;
-  transform: translate(-37%, -93%);
+  transform: translateX(-58%);
   transition: left 0.15s linear;
   pointer-events: none;
 }
