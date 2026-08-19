@@ -10,6 +10,16 @@
 
 html {
   scroll-behavior: smooth;
+  /* The real clip for intentional horizontal bleed (Work section's
+     diagonal ribbon bands, ink splats, etc.) — `body`'s own
+     `overflow-x: hidden` below was assumed to be enough (see the comment
+     on `.work` in Work.module.css) but isn't reliably propagated to the
+     viewport by every mobile browser; confirmed live on a real phone as
+     genuine page-level horizontal scroll (`document.documentElement`
+     `.scrollWidth` exceeding `.clientWidth`), not just a visual clip
+     miss. `overflow-x` on `html` itself is never propagated away, so
+     this is the one that actually has to carry it. */
+  overflow-x: hidden;
 }
 
 body {
