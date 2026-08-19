@@ -12,13 +12,23 @@
   isolation: isolate;
 }
 
-/* Mobile: this bar no longer carries navigation (that's `.mobileTabBar`
-   below) — just the logo — and isn't pinned anymore, so it scrolls away
-   with the page like a normal header instead of staying fixed on top of
-   content. Explicit ask. */
+/* Mobile: no longer carries navigation (that's `.mobileTabBar` below) —
+   just the logo — and no longer pinned, so it scrolls away with the page
+   like a normal header. `position: absolute`, not `static` — unlike
+   `fixed`, an absolutely-positioned element with no positioned ancestor
+   is anchored to the document itself and scrolls out of view normally
+   as the page scrolls, but unlike `static` it's still taken OUT of
+   normal flow, so it doesn't push Hero/About/Work/Contact down. `static`
+   was tried first and caused a real regression: it pushes `.heroStage`
+   down by this bar's own height, and Hero's sticky/ScrollTrigger math
+   (tuned assuming nothing sits above Hero) doesn't account for that —
+   confirmed live as a visible gap opening up between Hero and About.
+   Also thinner (2/3 of --nav-height) and a plain rectangle (no
+   border-radius) instead of the desktop shape — explicit ask. */
 @media (max-width: 767px) {
   .nav {
-    position: static;
+    position: absolute;
+    border-radius: 0;
   }
 }
 
@@ -28,6 +38,16 @@
   justify-content: space-between;
   height: var(--nav-height);
   flex-shrink: 0;
+}
+
+/* Placed after the base rule above (not grouped into the `.nav` media
+   query further up) — same selector + same media condition would
+   otherwise lose to the later, unconditional base rule on source order,
+   since specificity is identical either way. */
+@media (max-width: 767px) {
+  .navTopRow {
+    height: calc(var(--nav-height) * 2 / 3);
+  }
 }
 
 .logoLink {

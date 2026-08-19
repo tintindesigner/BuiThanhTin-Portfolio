@@ -6,13 +6,13 @@
   overflow: hidden;
 }
 
-/* Navbar is no longer `position: fixed` on mobile (it scrolls away with
-   the page instead — see Navbar.module.css), so it no longer overlays
-   this page's own top content and doesn't need to be cleared anymore —
-   just the plain breathing-room amount. */
+/* Navbar is `position: absolute` on mobile (out of flow, scrolls away —
+   see Navbar.module.css), not `fixed`, but it's still out-of-flow and
+   still overlays this page's own top content on first load exactly like
+   the desktop fixed version does, just at 2/3 the height there. */
 @media (max-width: 767px) {
   .page {
-    padding-top: clamp(32px, 5vw, 56px);
+    padding-top: calc(var(--nav-height) * 2 / 3 + clamp(32px, 5vw, 56px));
   }
 }
 
