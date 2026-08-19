@@ -1,0 +1,243 @@
+/* .nav has no fixed height — it's whatever its children (the fixed-height
+   top row + the collapsible mobile-links block) add up to, so opening the
+   mobile menu grows this same bar taller instead of showing a separate
+   box below it. `border-radius` lives on this outer element so the
+   rounded-bottom shape follows however tall it currently is. */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  padding: 0 clamp(20px, 7.57vw, 109px);
+  border-radius: 0 0 48px 48px;
+  background: var(--dark-violet);
+  isolation: isolate;
+}
+
+.navTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--nav-height);
+  flex-shrink: 0;
+}
+
+.logoLink {
+  display: flex;
+  align-items: center;
+  width: clamp(48px, 5.5vw, 79px);
+}
+
+.logo {
+  width: 100%;
+  height: auto;
+  color: var(--ink-yellow);
+}
+
+.links {
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 3vw, 44px);
+}
+
+.linkItem {
+  position: relative;
+}
+
+.linkButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: clamp(16px, 1.9vw, var(--h3-size));
+  line-height: var(--h3-line-height);
+  padding: 8px 8px 6px;
+  /* Declared here (the element Navbar.tsx's onMouseMove sets these on),
+     NOT on .hoverChip below — a custom property declared on an element
+     itself always wins over one inherited from an ancestor, so a default
+     on .hoverChip too would permanently shadow whatever the JS sets. */
+  --tilt-x: 0;
+  --tilt-y: 0;
+  /* The hover chip's artwork (menu-hover.svg) native coordinate space,
+     and its display width — single source of truth for the several CSS
+     rules below (`.hoverChip`, `.hoverChipStripesInner`) that need to
+     agree on both. */
+  --hover-chip-native-w: 450.39;
+  --hover-chip-native-h: 207.03;
+  --hover-chip-w: 6.875em;
+}
+
+/* ---------- Hover — Figma's "Variant3" state: label rotates and turns
+   white, an illustrated splat-chip (menu-hover.svg) pops in behind it
+   with a liquid squash-and-settle stretch (same overshoot language as the
+   Hero box's jelly-bounce entrance). Independent of .underline below —
+   the active-page indicator stays visible through hover, doesn't get
+   replaced by it. ---------- */
+.linkLabel {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  color: var(--ink-yellow);
+  transition:
+    color 0.2s ease,
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.linkButton:hover .linkLabel,
+.linkButton:focus-visible .linkLabel {
+  color: var(--white);
+  transform: rotate(-6deg);
+}
+
+/* Sized generously (~220px at the max 32px font-size) so the widest label
+   ("CONTACT") never overflows past its edges — Figma only demoed the
+   hover on the short word "WORK". `em`, not a fixed px, so it scales with
+   .linkButton's own responsive `font-size: clamp(...)`. */
+.hoverChip {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 0;
+  width: var(--hover-chip-w);
+  aspect-ratio: var(--hover-chip-native-w) / var(--hover-chip-native-h);
+  pointer-events: none;
+  /* `scale` handles the slow elastic pop-in/out; `translate`/`rotate` are
+     separate CSS properties (not part of the `transform` shorthand) so
+     the fast cursor-follow "liquid pull" (driven by --tilt-x/--tilt-y,
+     set from Navbar.tsx's onMouseMove) transitions on its own quick
+     timing without fighting the slow scale transition on the same
+     element. */
+  translate: calc(-50% + var(--tilt-x) * 10px) calc(-50% + var(--tilt-y) * 6px);
+  rotate: calc(var(--tilt-x) * 5deg);
+  scale: 0.35 0.55;
+  opacity: 0;
+  transition:
+    scale 0.45s cubic-bezier(0.32, 1.75, 0.5, 1),
+    opacity 0.2s ease,
+    translate 0.15s ease-out,
+    rotate 0.15s ease-out;
+}
+
+.linkButton:hover .hoverChip,
+.linkButton:focus-visible .hoverChip {
+  scale: 1 1;
+  opacity: 1;
+}
+
+.hoverChipArt {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* The animated stripe layer replacing menu-hover.svg's original static
+   striped fill (see Navbar.tsx — reuses StripedBackground, moving faster
+   than the Hero's background stripes). `clip-path: path(...)` only
+   accepts absolute units, so .hoverChipStripesInner is sized at the
+   artwork's native units and scaled down to .hoverChip's actual `em`
+   display width via a CSS length÷length calc() — no JS, no hardcoded
+   scale constant to keep in sync by hand. */
+.hoverChipStripesWrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.hoverChipStripesInner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(var(--hover-chip-native-w) * 1px);
+  height: calc(var(--hover-chip-native-h) * 1px);
+  transform-origin: top left;
+  transform: scale(calc(var(--hover-chip-w) / (var(--hover-chip-native-w) * 1px)));
+}
+
+.underline {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: -2px;
+  height: 4px;
+  border-radius: 6px;
+  background: var(--ink-pink);
+  transform: scaleX(0);
+  transform-origin: left;
+  /* Overshoot easing (same family as .linkLabel's hover rotate above and
+     the job-card/UR-Card "nhún" bounce elsewhere in the project) so the
+     active-page indicator visibly squashes past full width and settles
+     back, instead of a flat linear grow/shrink — reads as a bounce as
+     scroll-spy moves it between pages. */
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.linkItem[data-active='true'] .underline {
+  transform: scaleX(1);
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  width: 32px;
+  padding: 8px 4px;
+}
+
+.hamburger span {
+  display: block;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--ink-yellow);
+  transition: transform 0.25s ease, opacity 0.2s ease;
+}
+
+.hamburger[data-open='true'] span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+.hamburger[data-open='true'] span:nth-child(2) {
+  opacity: 0;
+}
+.hamburger[data-open='true'] span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+.mobileLinks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-height: 0;
+  padding: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition:
+    max-height 0.3s ease,
+    padding 0.3s ease,
+    opacity 0.2s ease;
+}
+
+.mobileLinks[data-open='true'] {
+  max-height: 420px;
+  padding: 8px 0 28px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobileLinks .linkButton {
+  font-size: 20px;
+}
+
+@media (max-width: 767px) {
+  .links {
+    display: none;
+  }
+  .hamburger {
+    display: flex;
+  }
+}

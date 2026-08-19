@@ -1,0 +1,344 @@
+/* Always exactly full-bleed (100% × 100% of the hero) regardless of
+   viewport size or aspect ratio — no letterboxing, no empty margins.
+   Every child below is positioned in plain percentages of THIS box, so
+   they stay proportionally placed at any size (just not pixel-identical
+   to the 1440×800 Figma frame on every aspect ratio, by design). */
+.layer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Every element below (except ink1/ink2) is positioned by its CENTER
+   point, not its top-left corner: `left`/`top` mark the center, and
+   `translate(-50%, -50%)` pulls the element back by half its own size.
+   Resizing an element then grows/shrinks it evenly around that same
+   center instead of drifting toward one corner. */
+
+/* ---------- Product box (center) ----------
+   Three nested layers, each with one job:
+   - .boxAnchor   — static resting position/size, never touched by GSAP.
+   - .boxEntrance — what the entrance tween animates (y, scale, filter);
+     kept separate from .boxAnchor so a GSAP tween can't clobber the
+     anchor's percentage `translate(-50%,-50%)` (same reasoning as
+     .unboxAnchor/.unboxWrap below).
+   - .boxCanvasHost — plain, always-untransformed wrapper around
+     <Canvas>. R3F sizes the canvas off this element specifically; if
+     .boxEntrance's own transform were its direct parent instead, R3F's
+     first size read (mid-entrance) comes back wrong. See HeroDecor.tsx
+     for how the entrance sequences around this. */
+.boxAnchor {
+  position: absolute;
+  left: 52.15%;
+  top: 50%;
+  /* Literal 77%/77% (not width:auto + aspect-ratio) — both axes given
+     explicitly so there's no browser ambiguity to resolve, and %w
+     always equals %h regardless of the frame's own aspect ratio. */
+  width: 77%;
+  height: 77%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  pointer-events: auto;
+  cursor: pointer;
+  filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.28));
+}
+
+.boxEntrance {
+  width: 100%;
+  height: 100%;
+}
+
+.boxCanvasHost {
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------- Burst + headline (left) ----------
+   Sized by WIDTH + aspect-ratio, not height — every other element here
+   (buy, unbox, box, badges) sizes off the hero's WIDTH, but this one used
+   to size off height instead. Since the hero's height is a fixed 100vh,
+   that meant resizing the window's WIDTH (the far more common resize —
+   window width changes constantly, 100vh mostly doesn't) left the burst
+   completely unchanged in pixels while everything else scaled, i.e. stuck
+   at one size. width:33.7% reproduces the exact same pixel size the old
+   height:56% gave at the 1440×801 reference frame, just driven by the
+   axis that actually varies. */
+.burstWrap {
+  position: absolute;
+  left: 28.9%;
+  top: 29%;
+  width: 33.7%;
+  height: auto;
+  aspect-ratio: 606.82 / 560.49;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.18));
+}
+
+.burstSvg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Split into an anchor (position/rotate, never touched by GSAP) + an inner
+   SVG that GSAP scales/fades — GSAP taking over `transform` on an <svg>
+   ROOT element that also carries a percentage `translate(-50%,-50%)` bakes
+   that percentage into a fixed pixel offset the first time it runs, which
+   then drifts out of place on any later resize (confirmed: center jumped
+   from 31.2%/79% to 39.26%/87.35% after a resize with no reload). Plain
+   `<div>` anchors (.boxAnchor, .unboxAnchor, badges) don't have this bug —
+   only bare SVG roots do. */
+.buyAnchor {
+  position: absolute;
+  left: 26.2%;
+  top: 79%;
+  width: 21.8%;
+  transform: translate(-50%, -50%) rotate(-3deg);
+  z-index: 2;
+  filter: drop-shadow(1.5px 0 0 var(--ink-black)) drop-shadow(-1.5px 0 0 var(--ink-black))
+    drop-shadow(0 1.5px 0 var(--ink-black)) drop-shadow(0 -1.5px 0 var(--ink-black))
+    drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
+}
+
+.buyGraphic {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ---------- Click to unbox (right) ----------
+   Positioning lives on this outer anchor, kept separate from .unboxWrap
+   because that element's GSAP entrance tween animates x/y directly and
+   would otherwise clobber a translate(-50%,-50%) set on the same node. */
+.unboxAnchor {
+  position: absolute;
+  left: 80.8%;
+  top: 34.6%;
+  width: 21.1%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.unboxWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  /* Box sits down-and-left of this element (box center 52.15%/50% vs this
+     anchor's 80.8%/34.6%) — biasing the scale pivot to the bottom-left
+     corner instead of dead-center means the idle "nhún" pulse (scale, in
+     HeroDecor.tsx) visibly grows toward the box each cycle instead of
+     expanding evenly outward. */
+  transform-origin: 0% 100%;
+}
+
+.unboxIcon {
+  width: 100%;
+  height: auto;
+}
+
+/* ---------- Skill badges ----------
+   Each badge is sized individually from its own Figma bounding box —
+   they are NOT uniform (the Ai generative badge is notably larger than
+   the other three in the source file). */
+.badge {
+  position: absolute;
+  box-sizing: border-box;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%) rotate(var(--rot, -6deg));
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.15));
+  mix-blend-mode: hard-light;
+}
+
+.badge svg {
+  width: 100%;
+  height: 100%;
+}
+
+.badgeAdvertising {
+  left: 8.8%;
+  top: 23.9%;
+  width: 9.7%;
+}
+
+.badgeAi {
+  left: 91%;
+  top: 65%;
+  width: 12.6%;
+  --rot: 5deg;
+}
+
+.badgePhotoshoot {
+  left: 74.1%;
+  top: 81.8%;
+  width: 5.8%;
+  --rot: 8deg;
+}
+
+.badgeMotion {
+  left: 10%;
+  top: 79%;
+  width: 6.8%;
+  --rot: -10deg;
+}
+
+/* ---------- Ink splats — same % everywhere, they scale with the frame.
+   ink1/ink2 stay corner-anchored (top-left of the element), per request —
+   everything else above is center-anchored. ---------- */
+.ink {
+  position: absolute;
+  width: 8%;
+  opacity: 0.9;
+}
+
+.ink1 {
+  left: -10.3%;
+  top: 38.6%;
+  width: 22.4%;
+}
+
+.ink2 {
+  left: 92%;
+  top: 10.7%;
+  width: 16%;
+}
+
+/* Same anchor/inner-SVG split as .buyAnchor above, and for the same reason
+   — this is the only other <svg>-root element GSAP animates (it pops in
+   together with the burst, see HeroDecor.tsx). Both this and .inkCorner
+   render the Ink5 asset (the Figma frame uses ink-5 twice, not a distinct
+   asset per instance) — named for what/where they are, not a numbered
+   slot, so that reuse doesn't read as a mismatch. */
+.inkBurstAnchor {
+  position: absolute;
+  left: 22.4%;
+  top: 38.1%;
+  width: 28.3%;
+  transform: translate(-50%, -50%);
+}
+
+.inkBurstSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.inkCorner {
+  left: 97.8%;
+  top: 115%;
+  width: 31.4%;
+  opacity: 0.7;
+  transform: translate(-50%, -50%);
+}
+
+/* ---------- Portrait/mobile layout ----------
+   Box keeps its desktop position/size (`top:50%`, untouched) — only
+   `left` is overridden (50%, vs desktop's slightly-off-center 52.15%),
+   since a single-column mobile layout has no reason for that asymmetry.
+   Burst + buy1getall sit above the box; click-to-unbox overlaps it.
+   Same 767px breakpoint as the navbar's hamburger switch, for
+   consistency. Badges and ink splats below have their own verified
+   mobile overrides too. */
+@media (max-width: 767px) {
+  .boxAnchor {
+    left: 50%;
+  }
+
+  .burstWrap {
+    left: 50%;
+    top: 23%;
+    width: 58%;
+  }
+
+  .buyAnchor {
+    left: 50%;
+    top: 34%;
+    width: 36%;
+  }
+
+  .unboxAnchor {
+    left: 50%;
+    top: 73%;
+    width: 50%;
+    transform: translate(-50%, -50%) rotate(10deg);
+  }
+
+  /* Box sits directly ABOVE this element on mobile (both centered at
+     left:50%, box at top:50% vs this anchor's top:73%) — desktop's
+     bottom-left-corner pivot would point the wrong way here, so the
+     pulse's origin becomes top-center instead. */
+  .unboxWrap {
+    transform-origin: 50% 0%;
+  }
+
+  /* Badges flank the box's left/right margins (box is 77% wide, centered
+     — only ~11.5% side margin) at four different heights instead of
+     desktop's scattered corners, since portrait has no room for that
+     spread. Sizes bumped ~1.6x from the first mobile pass (8/6/10/5%) per
+     request to read bigger on phone — anchor points (left/top) unchanged,
+     just wider, so a little more overlap onto the box edge is expected. */
+  .badgeAdvertising {
+    left: 10%;
+    top: 28%;
+    width: 13%;
+  }
+
+  .badgeMotion {
+    left: 8%;
+    top: 60%;
+    width: 10%;
+  }
+
+  .badgeAi {
+    left: 90%;
+    top: 46%;
+    width: 16%;
+  }
+
+  .badgePhotoshoot {
+    left: 89%;
+    top: 80%;
+    width: 8%;
+  }
+
+  /* Violet ink1: doubled (32% -> 64%) and pushed further left so exactly
+     half the shape is cut off by the screen edge — left = -width/2. */
+  .ink1 {
+    left: -32%;
+    top: 38.6%;
+    width: 64%;
+  }
+
+  .ink2 {
+    left: 92%;
+    top: 10.7%;
+    width: 23%;
+  }
+
+  /* Pink ink-5 behind the burst. `left` was still the desktop value
+     (22.4%) while .burstWrap's mobile override recenters the star to
+     left:50% — the two drifted apart on mobile, so the ink read as
+     floating beside the star instead of tucked under it. Recentered to
+     match burst's mobile left:50% (z-order was already correct: burst's
+     explicit z-index:2 always paints above this element's implicit
+     auto/0, regardless of position). */
+  .inkBurstAnchor {
+    left: 50%;
+    top: 26%;
+    width: 40%;
+  }
+
+  /* Pink ink-5 at the bottom: tripled (28% -> 84%) and pushed into the
+     literal page corner (100%/100%, was 88%/92%) so it's clipped by BOTH
+     the right and bottom edges — "cắt góc 4". */
+  .inkCorner {
+    left: 100%;
+    top: 100%;
+    width: 84%;
+  }
+}

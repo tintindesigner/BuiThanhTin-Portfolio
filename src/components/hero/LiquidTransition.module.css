@@ -1,0 +1,15 @@
+/* Fixed full-viewport overlay, above all normal page content but below
+   the Navbar (z-index:500 in Navbar.module.css) — the nav bar stays put
+   as constant chrome while the scene underneath transitions. */
+.svg {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 490;
+  pointer-events: none;
+}
+
+.group {
+  opacity: 0;
+}

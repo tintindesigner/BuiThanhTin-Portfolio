@@ -1,0 +1,311 @@
+.page {
+  position: relative;
+  min-height: 100vh;
+  padding-top: calc(var(--nav-height) + clamp(32px, 5vw, 56px));
+  padding-bottom: clamp(48px, 8vw, 96px);
+  overflow: hidden;
+}
+
+/* Ink `left`/`right` % values are computed relative to the JOB CARD's
+   own width (1216px in Figma, always inset 112px from each edge of the
+   1440px page canvas there), NOT the full page — this frame reproduces
+   that same 1216px/centered box as the ink's containing block. Without
+   it, ink was positioned as a % of the FULL viewport width while the
+   actual card caps at 1216px and stops growing past that — the two
+   diverge more and more at wider viewports, which is what read as ink
+   "jumping" on resize (confirmed live: an ink meant to sit at the card's
+   own corner drifted noticeably further from it as viewport width grew
+   past ~1216px). `top`/`bottom` stay relative to `.page`'s own full
+   height, unaffected — the page has no vertical width-style cap in
+   either Figma or the built page, so that axis was never the problem. */
+.inkFrame {
+  position: absolute;
+  inset: 0;
+  max-width: 1216px;
+  margin: 0 auto;
+}
+
+.ink {
+  position: absolute;
+  height: auto;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.project {
+  position: relative;
+  z-index: 1;
+  max-width: 1216px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 4vw, 24px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(32px, 5vw, 48px);
+}
+
+.job {
+  width: 100%;
+  background: var(--cream);
+  border-radius: 32px;
+  padding: clamp(32px, 6vw, 64px) clamp(20px, 6vw, 72px) clamp(40px, 7vw, 72px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(24px, 4vw, 40px);
+}
+
+.title {
+  font-family: var(--font-display);
+  color: var(--dark-violet);
+  text-align: center;
+  line-height: 1.15;
+}
+
+.title span {
+  display: block;
+  font-size: clamp(24px, 4.4vw, 56px);
+}
+
+.title span:first-child {
+  font-size: clamp(28px, 5.4vw, 64px);
+}
+
+.hero {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 2px solid var(--ink-purple);
+  border-radius: 16px;
+  overflow: hidden;
+  background: none;
+  cursor: pointer;
+}
+
+.hero img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition:
+    transform 0.25s ease,
+    filter 0.25s ease;
+}
+
+.hero:hover img,
+.hero:focus-visible img {
+  transform: rotate(2deg) scale(1.06);
+  filter: brightness(1.12);
+}
+
+.description {
+  /* Was `max-width: 780px` — narrower than `.hero` (width:100% of the
+     same card), which wrapped the paragraph text into far more lines
+     than needed. Matching the image's own full width now. */
+  width: 100%;
+  font-family: var(--font-caption);
+  font-size: clamp(15px, 1.8vw, 22px);
+  line-height: 1.5;
+  color: var(--dark-violet);
+  text-align: center;
+  /* Figma's source text is several distinct paragraphs (a blank line
+     between each) — preserve those line breaks from the data string
+     instead of collapsing to one run-on paragraph. */
+  white-space: pre-line;
+}
+
+.section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(16px, 2.5vw, 24px);
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  color: var(--dark-violet);
+  font-size: clamp(20px, 2.8vw, 32px);
+  text-align: center;
+}
+
+/* Per-column headings, always an equal-width grid regardless of whatever
+   weight the row's own image cells use below — matches Figma, where the
+   column titles are a plain `grid-cols-N` independent of the image row's
+   own proportions. */
+.columnLabels {
+  width: 100%;
+  display: grid;
+  gap: clamp(10px, 1.8vw, 24px);
+}
+
+/* One row per Figma section grouping — images split the row's width by
+   their own `weight` (equal by default), not a generic auto-fit grid,
+   so each page keeps its own actual column/grouping structure. */
+.row {
+  width: 100%;
+  display: flex;
+  gap: clamp(10px, 1.8vw, 24px);
+  align-items: flex-start;
+}
+
+/* A row cell that's itself a mini-grid (a big image sitting beside a
+   cluster of smaller shots — see `isImageGroup` in CaseStudyPage.tsx). */
+.miniGrid {
+  display: grid;
+  gap: clamp(10px, 1.8vw, 24px);
+  min-width: 0;
+  align-self: stretch;
+}
+
+.imageFrame {
+  position: relative;
+  min-width: 0;
+  padding: 0;
+  border: 2px solid var(--ink-purple);
+  border-radius: 12px;
+  overflow: hidden;
+  background: none;
+  cursor: pointer;
+}
+
+/* For irregular die-cut PNGs with real transparency — a rectangular
+   violet stroke around a cutout shape reads as wrong, unlike on a plain
+   rectangular photo. */
+.imageFrame.noStroke {
+  border: none;
+  border-radius: 0;
+}
+
+.imageFrame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition:
+    transform 0.25s ease,
+    filter 0.25s ease;
+}
+
+/* Scale bump alongside the rotate is a technical necessity, not extra
+   flourish — a plain rotate on an image that exactly fills its clipped
+   frame reveals background gaps at the corners. */
+.imageFrame:hover img,
+.imageFrame:focus-visible img {
+  transform: rotate(2deg) scale(1.08);
+  filter: brightness(1.12);
+}
+
+/* ---------- Bottom row: NEXT PROJECT + back-to-top ----------
+   Desktop: NEXT PROJECT centered under the Job card, back-to-top pulled
+   out of the flex flow and pinned to the right edge instead (`.bottomRow`
+   is a direct sibling of `.job` with the same width, so `right: 0` in
+   BackToTop.module.css lines up exactly with the Job card's own right
+   edge). Mobile: NEXT PROJECT sits left instead of centered, freeing up
+   room on the right for back-to-top's own right-pin to not collide with
+   it — explicit ask, and also just enough room at this button's normal
+   (non-doubled, see `.nextProject` below) mobile size. */
+.bottomRow {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 700px) {
+  .bottomRow {
+    justify-content: flex-start;
+  }
+}
+
+.nextProjectWrap {
+  position: relative;
+}
+
+/* Vertically centered on the button (`top: 50%` + `translate(-50%)` of
+   the ink's OWN height) rather than a hand-picked top%, which kept
+   reading as floating too high — the ink's height comes out to a
+   different % of wrap-height than of wrap-width (they don't share an
+   aspect ratio), so a top% tuned by eye doesn't stay level if the
+   button's own size ever changes. Centering sidesteps that entirely. */
+/* Split into a static-position ANCHOR (this element) and an inner,
+   untransformed element GSAP actually animates (`.nextProjectInk` below)
+   — putting the static `translate: 0 -50%` centering on the SAME element
+   GSAP tweens `y` on produced wildly wrong values (a composited
+   ~-105px, matching the resolved -50% baseline plus GSAP's own delta,
+   effectively locked after the first tween stage) — GSAP's own transform
+   bookkeeping doesn't compose cleanly with a pre-existing standalone
+   `translate` CSS property on the same node. Splitting the static offset
+   onto a separate ancestor is the same "don't animate the element that
+   already carries a CSS percentage translate" rule already documented
+   for Hero's decorative SVGs, just hit again via a different property. */
+.nextProjectInkAnchor {
+  position: absolute;
+  left: -5%;
+  top: 50%;
+  translate: 0 -50%;
+  width: 45%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.nextProjectInk {
+  display: block;
+  width: 100%;
+}
+
+.nextProjectInk svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Same chip art/effect as SEE MORE (Work.module.css's `.seeMore`), just
+   resized and re-texted — see NextProjectButton.tsx. 18em is the mobile
+   base size: +20% on mobile itself (explicit ask), further doubled from
+   THAT on desktop (separate explicit ask, see the min-width query
+   below) — the two scale-ups compose rather than one replacing the
+   other. */
+.nextProject {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  width: calc(18em * 1.2);
+  aspect-ratio: 450.4 / 207;
+  font-size: clamp(9px, 3vw, 14px);
+  text-decoration: none;
+  --tilt-x: 0;
+  --tilt-y: 0;
+}
+
+@media (min-width: 701px) {
+  .nextProject {
+    width: 36em;
+  }
+}
+
+.nextProjectArt {
+  display: block;
+  width: 100%;
+  height: 100%;
+  translate: calc(var(--tilt-x) * 6px) calc(var(--tilt-y) * 4px);
+  rotate: calc(var(--tilt-x) * 3deg);
+  filter: brightness(1);
+  transition:
+    translate 0.15s ease-out,
+    rotate 0.15s ease-out,
+    filter 0.2s ease-out;
+}
+
+.nextProject:hover .nextProjectArt,
+.nextProject:focus-visible .nextProjectArt {
+  filter: brightness(1.15);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero img,
+  .imageFrame img,
+  .nextProjectArt {
+    transition: none;
+  }
+}

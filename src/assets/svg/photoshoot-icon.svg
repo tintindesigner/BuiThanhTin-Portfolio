@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="xphotoshootic-Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 400 400">
+  <!-- Generator: Adobe Illustrator 30.2.1, SVG Export Plug-In . SVG Version: 2.1.1 Build 1)  -->
+  <defs>
+    <style>
+      .xphotoshootic-st0, .xphotoshootic-st1, .xphotoshootic-st2, .xphotoshootic-st3 {
+        fill: none;
+      }
+
+      .xphotoshootic-st0, .xphotoshootic-st2 {
+        stroke: #ffe600;
+      }
+
+      .xphotoshootic-st0, .xphotoshootic-st2, .xphotoshootic-st3 {
+        stroke-miterlimit: 10;
+      }
+
+      .xphotoshootic-st0, .xphotoshootic-st3 {
+        stroke-width: 12.99px;
+      }
+
+      .xphotoshootic-st4 {
+        fill: #FF3D7F;
+      }
+
+      .xphotoshootic-st2 {
+        stroke-width: 6.2px;
+      }
+
+      .xphotoshootic-st3 {
+        stroke: #5619C4;
+      }
+    </style>
+  </defs>
+  <g>
+    <circle class="xphotoshootic-st2" cx="203.25" cy="220.63" r="99.78"/>
+    <path class="xphotoshootic-st4" d="M292.35,220.63l-87.58-32.39,47.22-42.22c24.31,15.91,40.36,43.39,40.36,74.61Z"/>
+    <path class="xphotoshootic-st4" d="M247.86,143.47l-71.84,59.65-12.95-62.01c25.93-13.09,57.75-13.26,84.79,2.35Z"/>
+    <path class="xphotoshootic-st4" d="M158.76,143.47l15.74,92.04-60.17-19.79c1.62-29,17.4-56.64,44.43-72.25Z"/>
+    <path class="xphotoshootic-st4" d="M114.21,220.63l87.58,32.39-47.22,42.22c-24.31-15.91-40.36-43.39-40.36-74.61Z"/>
+    <path class="xphotoshootic-st4" d="M158.76,297.79l71.84-59.65,12.95,62.01c-25.93,13.09-57.75,13.26-84.79-2.35Z"/>
+    <path class="xphotoshootic-st4" d="M247.85,297.79l-15.74-92.04,60.17,19.79c-1.62,29-17.4,56.64-44.43,72.25Z"/>
+    <line class="xphotoshootic-st1" x1="251.99" y1="146.02" x2="204.77" y2="188.24"/>
+  </g>
+  <rect class="xphotoshootic-st3" x="43.25" y="81.18" width="307" height="291.9" rx="51.57" ry="51.57"/>
+  <rect class="xphotoshootic-st0" x="49.75" y="74.68" width="307" height="291.9" rx="51.57" ry="51.57"/>
+</svg>

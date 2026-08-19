@@ -1,0 +1,78 @@
+.contact {
+  position: relative;
+  overflow: hidden;
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  max-width: 1216px;
+  margin: 0 auto;
+  padding: clamp(48px, 8vw, 96px) clamp(20px, 5vw, 80px) clamp(56px, 9vw, 112px);
+}
+
+.titleWrap {
+  position: relative;
+}
+
+/* Positioned to sit just above and left of the title, centered over
+   the "C" in "CONTACT". */
+.ink {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: clamp(140px, 20vw, 260px);
+  height: auto;
+  transform: translate(-88%, 65%);
+  pointer-events: none;
+}
+
+.sectionTitle {
+  position: relative;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 9vw, var(--h2-size));
+  line-height: var(--h2-line-height);
+  color: var(--white);
+  text-align: center;
+}
+
+.details {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px 48px;
+  width: 100%;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: clamp(16px, 2vw, 24px);
+  line-height: 1.5;
+}
+
+.detail {
+  color: var(--white);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.detail:hover,
+.detail:focus-visible {
+  opacity: 0.75;
+}
+
+.detailRight {
+  text-align: right;
+  margin-left: auto;
+}
+
+/* Both left-aligned on mobile — explicit ask — instead of phone staying
+   right-aligned once the row wraps to a stack. */
+@media (max-width: 767px) {
+  .detailRight {
+    text-align: left;
+    margin-left: 0;
+  }
+}

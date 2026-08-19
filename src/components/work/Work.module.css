@@ -1,0 +1,477 @@
+/* No `overflow: hidden` — the ribbon bands intentionally spill past
+   this section's own top/bottom edge (see `.ribbon`). Horizontal bleed
+   from the oversized bands/peak is caught by `body`'s global
+   `overflow-x: hidden` in global.css instead. */
+.work {
+  position: relative;
+}
+
+/* ---------- Ribbon divider ("WORK.../ARE YOU READY?") ----------
+   Sits on the section's own purple background; `.pinkPeak` below is
+   the pink overlay. `overflow: visible` lets the bands spill freely
+   past this box's own edges, scaling with `.ribbon`'s own responsive
+   height. Each band is wider than its own wrapper (180%) so rotating
+   it never reveals a gap at the edges, even at very wide viewports.
+
+   Both bands pivot around the EXACT SAME point (`left`/`top` below,
+   equal to `.pinkPeak`'s own apex) rather than each having its own
+   `top` — two lines only cross at a shared point if they share both
+   coordinates, so a single shared pivot is what guarantees the visual
+   crossing lands exactly there. `.readyBand` is declared first so
+   `.workBand` paints on top where they overlap. */
+.ribbon {
+  position: relative;
+  overflow: visible;
+  height: clamp(140px, 22vw, 260px);
+  margin-bottom: clamp(24px, 5vw, 56px);
+}
+
+.readyBand,
+.workBand {
+  position: absolute;
+  left: 35%;
+  top: 50%;
+  width: 180%;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.readyBand {
+  transform: translate(-50%, -50%) rotate(4deg);
+  background: var(--dark-violet);
+  border: 4px solid var(--stripe-yellow);
+  padding: clamp(6px, 1.2vw, 12px) 0;
+}
+
+.workBand {
+  transform: translate(-50%, -50%) rotate(-8deg);
+  background: var(--ink-yellow);
+  border: 6px solid var(--dark-violet);
+  padding: clamp(10px, 2vw, 20px) 0;
+}
+
+/* Pink "peak" overlay — see `PinkPeak` in Work.tsx. Spans the whole
+   `.work` section rather than just `.ribbon`'s own box, so it reaches
+   the section's true bottom regardless of grid height. `top: -4px`
+   (not a plain `inset: 0`) bleeds it slightly above the section's true
+   top edge to cover a subpixel-rounding hairline at the About/Work
+   seam. */
+.pinkPeak {
+  position: absolute;
+  top: -4px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* Apex at 35% from the left, 50% down `.ribbon`'s own height — must
+   equal `.readyBand`/`.workBand`'s shared pivot point above, using the
+   same `clamp()` formula as `.ribbon`'s own height so it stays in sync
+   at any viewport. Each half is one oversized rectangle pivoted at the
+   apex and rotated by the matching ribbon band's exact angle, so the
+   edges are true straight lines regardless of the section's aspect
+   ratio. Width/height overshoot (150%/200%) so the fill reaches every
+   edge after rotation at any viewport size. Fill/pattern comes from
+   the `StripedBackground` nested inside each in Work.tsx. */
+.peakRight,
+.peakLeft {
+  position: absolute;
+  top: calc(clamp(140px, 22vw, 260px) * 0.5);
+  width: 150%;
+  height: 200%;
+}
+
+.peakRight {
+  left: 35%;
+  transform-origin: top left;
+  transform: rotate(4deg);
+}
+
+.peakLeft {
+  right: 65%;
+  transform-origin: top right;
+  transform: rotate(-8deg);
+}
+
+.track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.trackHalf {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+}
+
+.readyBand .trackHalf {
+  font-size: clamp(16px, 2.4vw, 32px);
+  color: var(--stripe-yellow);
+}
+
+.workBand .trackHalf {
+  font-size: clamp(24px, 4.4vw, 56px);
+  color: var(--dark-violet);
+}
+
+/* ---------- Job grid ----------
+   Genuine responsive flexbox (flex-wrap + a capped card width) rather
+   than absolute-positioned art, so mobile needs no separate layout
+   pass. */
+.grid {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(32px, 5vw, 52px);
+  padding: 0 clamp(20px, 5vw, 80px) clamp(48px, 8vw, 96px);
+}
+
+.category {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 1216px;
+  /* About's badge clicks scrollIntoView({block:'start'}) straight to this
+     element — without this, the fixed Navbar (position:fixed, so it isn't
+     part of document flow scrollIntoView accounts for) lands directly on
+     top of `.categoryTitle`, covering the category name it just jumped
+     to. Extra 24px so the title clears the navbar with breathing room,
+     not flush against its bottom edge. */
+  scroll-margin-top: calc(var(--nav-height) + 24px);
+}
+
+.categoryTitle {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 2.6vw, var(--h3-size));
+  line-height: var(--h3-line-height);
+  color: var(--white);
+  text-align: center;
+}
+
+.cardRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 32px;
+  width: 100%;
+}
+
+/* `.cardWrap` carries the sizing so its sibling `.cardInk` can be
+   positioned against a box matching `.card`'s own footprint without
+   `.card` itself as its containing block. */
+.cardWrap {
+  position: relative;
+  width: min(383px, 100%);
+}
+
+.cardWrapWide {
+  width: 100%;
+  max-width: 1214px;
+}
+
+/* Solid dark-violet "sticker" backing — a SIBLING of `.card`, declared
+   BEFORE it in DOM order (same as originally) so it paints entirely
+   below `.card`'s own opaque background, not just below `.card`'s later
+   children — a CHILD element can never hide behind its own parent's
+   background (only behind other child content, which doesn't fully
+   cover the card, so nesting backing inside `.card` was tried first and
+   visibly failed). Rotated -6deg at rest and scaled to 0.5 so it sits
+   fully hidden until hover. Both this and `.card`'s own lift below are
+   driven by ONE shared trigger — their common `.cardWrap` ancestor's
+   `:hover`/`:focus-within` — via plain CSS transitions, not paired GSAP
+   tweens on two independently-tracked elements. That old pairing could
+   desync in real use (a card scrolling out from under a stationary
+   cursor doesn't reliably fire a matching mouseleave in every case),
+   leaving the backing stuck mid-reveal. CSS `:hover` can't desync the
+   same way: the browser recomputes it continuously regardless of how
+   scroll/pointer events fire, so backing and card can never drift out
+   of step. */
+/* Reproduces the same 3-stage squash/stretch shape as the GSAP
+   `playSquashBounce` timeline (lib/bounce.ts, still used by SEE MORE) —
+   squash-up, overshoot, settle — as pure CSS keyframes instead of a JS
+   timeline, so job cards get the identical "nhún như thạch" jelly feel
+   SEE MORE has. Deliberately NOT a JS onMouseEnter/onMouseLeave pairing
+   (that's the exact mechanism that desynced under scroll and once broke
+   every card on this grid — see project memory) — purely `:hover`/
+   `:focus-within`-triggered `animation`s, which the browser recomputes
+   continuously and correctly regardless of how scroll/pointer events
+   fire, same safety property the single-transition version had.
+   Deliberately NOT mixed with a `transition` on the same property either
+   (a real, separately-documented conflict class: an animation-in with
+   fill-mode:forwards racing a transition on the same property can leave
+   a property stuck at an early keyframe value) — both directions here
+   are `animation`s; the exit keyframe omits its own `from` transform so
+   the browser fills it in from wherever the entrance animation left off. */
+@keyframes cardBounceIn {
+  0% {
+    transform: scale(1, 1) translateY(0) rotate(0deg);
+    animation-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
+  20% {
+    transform: scale(0.92, 1.1) translateY(-4px) rotate(0deg);
+    animation-timing-function: cubic-bezier(0.645, 0.045, 0.355, 1);
+  }
+  42.86% {
+    transform: scale(1.05, 0.96) translateY(-11px) rotate(-3deg);
+    animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  100% {
+    transform: scale(1, 1) translateY(-7px) rotate(-3deg);
+  }
+}
+
+@keyframes cardSettle {
+  /* An explicit `from` matching `cardBounceIn`'s own 100% — an omitted
+     `from` resolves to the property's cascaded/underlying value (here,
+     the un-animated `transform: none`), NOT "wherever the element
+     currently sits" from a different prior animation, so leaving it out
+     produced an instant snap-back with no interpolation at all
+     (confirmed live: sampled at 50/150ms post-leave and found the
+     element already at rest instead of mid-settle). */
+  from {
+    transform: scale(1, 1) translateY(-7px) rotate(-3deg);
+  }
+  to {
+    transform: scale(1, 1) translateY(0) rotate(0deg);
+  }
+}
+
+@keyframes backingBounceIn {
+  0% {
+    transform: rotate(-6deg) scale(0.5);
+    animation-timing-function: cubic-bezier(0.645, 0.045, 0.355, 1);
+  }
+  30% {
+    transform: rotate(-4deg) scale(1);
+  }
+  100% {
+    transform: rotate(-4deg) scale(1);
+  }
+}
+
+@keyframes backingSettle {
+  from {
+    transform: rotate(-4deg) scale(1);
+  }
+  to {
+    transform: rotate(-6deg) scale(0.5);
+  }
+}
+
+.cardBacking {
+  position: absolute;
+  /* Slightly larger than `.card` (inset -6px, not 0) — combined with
+     only a 6deg rotation, an exact-size backing peeked out as a
+     near-invisible hairline. */
+  inset: -6px;
+  background: var(--dark-violet);
+  border-radius: 14px;
+  transform: rotate(-6deg) scale(0.5);
+  animation: backingSettle 0.25s ease-out;
+}
+
+.cardWrap:hover .cardBacking,
+.cardWrap:focus-within .cardBacking {
+  animation: backingBounceIn 0.7s forwards;
+  animation-delay: 0.14s;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 20px 22px 24px;
+  background: var(--cream);
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+  animation: cardSettle 0.25s ease-out;
+}
+
+.cardWrap:hover .card,
+.cardWrap:focus-within .card {
+  animation: cardBounceIn 0.7s forwards;
+}
+
+/* Decorative ink splat centered on the Social Post card's own
+   bottom-left corner (`deco: true` in Work.tsx). Declared before `.card`
+   in JSX so plain DOM order keeps it behind it — no z-index needed. */
+.cardInk {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  width: 34%;
+  height: auto;
+  transform: translate(-45%, -55%);
+  pointer-events: none;
+}
+
+/* Static (non-link) cards get the same hover treatment for visual
+   consistency, but a default cursor — no destination to promise. */
+a.card {
+  cursor: pointer;
+}
+
+.cardImageFrame {
+  background: var(--dark-violet);
+  border-radius: 8px;
+  padding: 6px;
+  aspect-ratio: 340 / 187;
+  overflow: hidden;
+}
+
+/* The wide Social Post card isn't a scaled-up regular card — Figma's own
+   frame is a short, wide banner (1214x415, image region 1172x316,
+   aspect ~3.71:1) rather than the regular card's ~1.82:1 image. Reusing
+   the regular aspect-ratio here rendered the card roughly 2x taller than
+   designed (confirmed via getBoundingClientRect: 754px tall vs. the
+   ~415px-scale target). */
+.cardWrapWide .cardImageFrame {
+  aspect-ratio: 1172 / 316;
+}
+
+.cardImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+  transition: filter 0.3s ease;
+}
+
+.card:hover .cardImage,
+.card:focus-visible .cardImage {
+  filter: brightness(1.14);
+}
+
+.cardBody {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.cardText {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cardTitle {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 22px;
+  color: var(--dark-violet);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+/* Clamped to 2 lines regardless of actual caption length — Figma gives
+   every job card, across every category, the exact same fixed footprint
+   (383x323) with a fixed-height caption text box, so a longer caption
+   there just fits within that same box rather than growing the card.
+   Before this, caption length alone drove `.card`'s height (1-line "AI
+   Generated video" vs. 4-line "Shooting video Product-focused videos
+   CHILL Cocktail" rendered 83px apart in the SAME row), which is what
+   read as "these boxes aren't the same size as the rest." */
+.cardCaption {
+  font-family: var(--font-caption);
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--ink-purple);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  /* `-webkit-line-clamp` only caps a MAXIMUM — a caption short enough to
+     sit on one line (e.g. "AI Generated video") doesn't get padded out
+     to two, so it alone still rendered shorter than every other card.
+     Reserving the full 2-line height regardless of actual content is
+     what makes every card the same size, matching Figma. */
+  min-height: 2.7em;
+}
+
+.cardIcon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.card:hover .cardIcon,
+.card:focus-visible .cardIcon {
+  transform: scale(1.15) rotate(12deg);
+}
+
+/* ---------- SEE MORE ----------
+   `see-more-hover.svg` (a Figma export) already bakes in the 2-layer
+   violet/yellow chip, the orange stripe polygons, the ink splat, and
+   the "SEE MORE" label as real SVG <text> — so this is one <svg> with
+   a cursor-tilt "liquid pull" (see useCursorTilt.ts, same technique as
+   Navbar's hover chip) plus a GSAP bounce on hover (see Work.tsx).
+   Native aspect ratio (450.4:207) is kept as-is. Width/height are
+   expressed in `em` off this element's own font-size so the whole
+   button scales down together at narrow viewports. */
+.seeMore {
+  display: inline-block;
+  width: 28em;
+  aspect-ratio: 450.4 / 207;
+  font-size: clamp(9px, 3.4vw, 16px);
+  /* Was `margin: 20px 0` — stacked on top of `.grid`'s own gap
+     (clamp(32px,5vw,52px)) above it, pushing it noticeably farther from
+     MOTION GRAPHIC & CLIP than the spacing between any other two
+     categories. Dropping the top margin brings it back to the same gap
+     every other row uses; kept a small bottom margin so it doesn't sit
+     flush against PRODUCT SHOOTING below it. */
+  margin: 0 0 12px;
+  text-decoration: none;
+  --tilt-x: 0;
+  --tilt-y: 0;
+}
+
+.seeMoreArt {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Base X offset recenters the chip itself within `.seeMore`'s box — the
+     source artwork's own 450.4-wide viewBox isn't symmetric around the
+     chip shape (extra room deliberately left on the left for the ink
+     splat to bleed into). -7.29%, measured via `getBBox()`/
+     `getBoundingClientRect()` to exactly center the chip's own bounding
+     box within `.seeMore` (confirmed live: left/right margin match to
+     within a fraction of a px). A later +10% nudge overshot badly
+     (confirmed live: left margin 71px vs right margin -3px, i.e. the
+     chip started overflowing past the box's own right edge) — reverted
+     back to the precisely-centered value. */
+  translate: calc(-7.29% + var(--tilt-x) * 6px) calc(var(--tilt-y) * 4px);
+  rotate: calc(var(--tilt-x) * 3deg);
+  filter: brightness(1);
+  transition:
+    translate 0.15s ease-out,
+    rotate 0.15s ease-out,
+    filter 0.2s ease-out;
+}
+
+.seeMore:hover .seeMoreArt,
+.seeMore:focus-visible .seeMoreArt {
+  filter: brightness(1.15);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .cardBacking,
+  .cardImage,
+  .seeMoreArt {
+    transition: none;
+  }
+}

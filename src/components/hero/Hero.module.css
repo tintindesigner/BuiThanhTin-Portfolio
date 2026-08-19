@@ -1,0 +1,17 @@
+/* Taller than the Hero itself — the extra height below is a "buffer" the
+   user scrolls through while .hero stays pinned via `position: sticky`
+   (see below). Reaching the bottom of this buffer (or clicking the box)
+   fires the Hero->About liquid transition, in Hero.tsx. */
+.heroStage {
+  position: relative;
+  height: calc(100vh + 70vh);
+}
+
+.hero {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  min-height: 560px;
+  overflow: hidden;
+}

@@ -1,0 +1,540 @@
+.about {
+  position: relative;
+  padding: 96px clamp(20px, 7.57vw, 109px) 64px;
+  overflow: hidden;
+}
+
+/* Everything else in this section is a normal-flow sibling AFTER the
+   absolutely-positioned StripedBackground, so it naturally paints on top
+   without needing an explicit z-index (same as Hero's own setup). */
+
+.sectionTitle {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  z-index: 2;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  /* `var(--h2-size)` alone (fixed 48px) let "BATTLE HISTORY" (the
+     longest of the 3 titles) render 412px wide — genuinely overflowing
+     past BOTH edges of a 375px viewport, confirmed live via
+     getBoundingClientRect, not just visually large. `clamp()` naturally
+     ceilings at exactly 48px for any viewport wider than ~533px (9vw
+     already exceeds 48px there), so this is a no-op on desktop — no
+     separate mobile-only override needed. */
+  font-size: clamp(28px, 9vw, var(--h2-size));
+  line-height: var(--h2-line-height);
+  color: var(--cream);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ---------- FIGURE X1 — skill badges around the character art ----------
+   Sized by an explicit aspect-ratio (matching the Figma frame's own
+   1150:678) with BOTH axes given as % of this container everywhere below,
+   not width-only + auto height — see r3f-css-gotchas item 1 for why a
+   single-axis % + auto tends to misbehave. */
+.figure {
+  position: relative;
+  width: 100%;
+  max-width: 1150px;
+  aspect-ratio: 1150 / 678;
+  margin: 0 auto;
+}
+
+.wordmarkWrap {
+  position: absolute;
+  left: 18.26%;
+  top: 5.46%;
+  width: 65.4%;
+  height: 92.2%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.wordmarkTop,
+.wordmarkBottom {
+  position: absolute;
+  display: block;
+}
+
+/* `.wordmarkTop`/`.wordmarkBottom` ARE the <svg> root elements themselves
+   (className applied directly by svgr) — the previous rule targeted
+   `.wordmarkTop svg` (a descendant), which matched nothing, so this never
+   applied and both rendered at their raw intrinsic pixel size (608x354,
+   636x340) instead of filling their inset-positioned box. That got
+   "fixed" by adding `width:100%; height:100%` — but combined with all 4
+   insets (top/right/bottom/left) also being set, the explicit width/height
+   WINS and the browser ignores right/bottom for sizing entirely: an
+   absolutely-positioned element with an explicit width/height sizes
+   itself to 100% of its containing block (.wordmarkWrap), not to the
+   inset-bounded box. Confirmed live via getBoundingClientRect — both
+   elements were rendering at the FULL wordmarkWrap size (e.g. 252x258 at
+   mobile width) instead of their own smaller region, which is what read
+   as "way too big, cropped by the wrapper's overflow:hidden". Fixed by
+   expressing size as width/height percentages (derived from 100% minus
+   the opposite insets) instead of mixing all 4 insets with an explicit
+   size — top/left position it, width/height size it, no cancellation. */
+.wordmarkTop {
+  top: 1.86%;
+  left: 1.1%;
+  width: 80.97%; /* 100% - left 1.1% - right 17.93% */
+  height: 56.63%; /* 100% - top 1.86% - bottom 41.51% */
+}
+
+.wordmarkBottom {
+  top: 43.71%;
+  left: 14.57%;
+  width: 84.61%; /* 100% - left 14.57% - right 0.82% */
+  height: 54.4%; /* 100% - top 43.71% - bottom 1.89% */
+}
+
+/* Split anchor (GSAP entrance target: x/opacity) from the inner <img>
+   (CSS :hover target: scale/rotate/brightness) — a GSAP tween leaves its
+   final value as an INLINE style, which would permanently block a CSS
+   `:hover` rule targeting the same `transform` property on the same
+   element (inline always wins over stylesheet rules). Same split used
+   for the Hero's box/buy/unbox anchors. */
+.riderPhotoAnchor {
+  position: absolute;
+  left: 34.26%;
+  top: 10.62%;
+  width: 35.04%;
+  height: 89.38%;
+}
+
+.riderPhoto {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  cursor: pointer;
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 0.3s ease;
+}
+
+.riderPhotoAnchor:hover .riderPhoto {
+  transform: scale(1.06) rotate(-3deg);
+  filter: brightness(1.2);
+}
+
+/* Now a real <button> (clicks scroll to its matching Work category) —
+   reset the browser's default button chrome so it still reads exactly
+   like the plain badge it was. */
+.badge {
+  position: absolute;
+  width: 17.4%;
+  text-align: center;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.badgeIcon svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+}
+
+/* `text-align:center` does NOT symmetrically center a single unbreakable
+   word wider than its box in this environment — confirmed live (even
+   with an inline-style override) it renders as if left-aligned, text
+   starting exactly at the box's own left edge and overflowing only
+   rightward, not centered on the icon above it. `left:50% +
+   translateX(-50%)` (the same technique already used for .sectionTitle
+   and originally in Figma's own export for these exact labels) centers
+   correctly regardless of text width. */
+.badgeLabel {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  margin-top: 5%;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: var(--h3-size);
+  line-height: var(--h3-line-height);
+  color: var(--ink-yellow);
+}
+
+.badgeAdvertising {
+  left: 4.6%;
+  top: 6.49%;
+}
+
+.badgeAi {
+  left: 77.9%;
+  top: 6.49%;
+}
+
+.badgeMotion {
+  left: 4.6%;
+  top: 50%;
+}
+
+.badgePhotoshoot {
+  left: 77.9%;
+  top: 50%;
+}
+
+/* ---------- UR CARD X1 — restructured from Figma's absolute/nowrap text
+   into a flex row (card art + stat column) instead of copying every
+   pixel coordinate: the original layout hardcodes each stat line's own
+   top offset with `whitespace-nowrap`, which only works at one fixed
+   width and breaks the moment lines need to wrap on a narrower screen. */
+.urCard {
+  position: relative;
+  width: 100%;
+  max-width: 1144px;
+  margin: 64px auto 0;
+  padding-top: 80px;
+}
+
+/* Figma source: left:calc(50% - 525.78px) + translateX(-50%) on a 1144px
+   container — i.e. positioned by its CENTER at 4.04% of the container's
+   width, not by its left edge. Missing the translateX(-50%) here was the
+   bug: `left:4%` alone treated 4% as the left EDGE instead of the
+   center, landing the splat ~14% too far right. */
+.urCardInk {
+  position: absolute;
+  left: 4.04%;
+  top: -14.87%;
+  width: 28.19%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.urCardRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(24px, 4vw, 64px);
+  flex-wrap: wrap;
+}
+
+/* ---------- Card: 4 layers, each with one job ----------
+   .urCardAnchor   — GSAP scroll-reveal target (opacity, extra rotate/scale
+                     tweened in). Never touched by CSS :hover or the flip.
+   .urCardFlipWrap — CSS :hover target (scale/rotate/brightness) + click
+                     handler + `perspective` for the 3D flip child. Kept
+                     separate from .urCardAnchor for the same
+                     inline-style-vs-:hover reason as .riderPhotoAnchor
+                     above.
+   .urCardInner    — the actual flip: `rotateY` toggled by a `data-flipped`
+                     attribute (plain CSS transition, not GSAP — no
+                     conflict with the hover transform since they're on
+                     different elements).
+   .urCardFace     — front/back images, `backface-visibility:hidden` so
+                     only one shows at a time; the back is pre-rotated
+                     180deg so it reads right-way-up once flipped to. */
+.urCardAnchor {
+  flex: 0 0 auto;
+  width: min(38%, 420px);
+}
+
+.urCardFlipWrap {
+  position: relative;
+  overflow: hidden;
+  perspective: 1600px;
+  cursor: pointer;
+  transform: rotate(-7.69deg);
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 0.3s ease;
+}
+
+.urCardFlipWrap:hover,
+.urCardFlipWrap:focus-visible {
+  transform: rotate(-11deg) scale(1.06);
+  filter: brightness(1.15);
+}
+
+/* Glare sweep — a sibling of `.urCardInner`, not a child, so it sits
+   above whichever face is currently showing without needing a copy per
+   face. Purely `transform: translateX()`, never `left`/`background-
+   position` — stays on the GPU compositor, no layout/repaint cost per
+   frame, so this is cheap regardless of hover frequency. */
+.urCardGlare {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.urCardGlare::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.35) 50%, transparent 65%);
+  transform: translateX(-60%);
+  transition: transform 0.9s ease;
+}
+
+.urCardFlipWrap:hover .urCardGlare::before,
+.urCardFlipWrap:focus-visible .urCardGlare::before {
+  transform: translateX(60%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .urCardGlare::before {
+    transition: none;
+  }
+}
+
+.urCardInner {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 700 / 948;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.urCardInner[data-flipped='true'] {
+  transform: rotateY(180deg);
+}
+
+.urCardFace {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  backface-visibility: hidden;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+}
+
+.urCardBack {
+  transform: rotateY(180deg);
+}
+
+.urCardStats {
+  flex: 1 1 320px;
+  max-width: 620px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: clamp(18px, 1.7vw, 32px);
+  line-height: 1.5;
+}
+
+.urCardStats p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.urCardAbilityLabel {
+  margin-top: 0.4em;
+}
+
+/* `.urCardStats p` (0,1,1) was beating this bare `.urCardAbilities`
+   (0,1,0) on specificity regardless of source order, so the ability
+   lines always rendered white instead of pink — confirmed live
+   (getComputedStyle showed the same rgba(255,255,255,0.9) on both).
+   Qualifying with the parent class bumps this to (0,2,0), which wins. */
+.urCardStats .urCardAbilities {
+  margin-top: 0.2em;
+  color: var(--pink-soft);
+}
+
+/* ---------- BATTLE HISTORY — zigzag timeline behind a 3-row list ---------- */
+.battleHistory {
+  position: relative;
+  width: 100%;
+  max-width: 981px;
+  margin: 96px auto 0;
+  padding-top: 80px;
+}
+
+/* Figma source: left:calc(50% - 213.69px) + translateX(-50%) on a
+   981.4px container — center at 28.23% of the container width. Was
+   wrongly hardcoded to a dead-center 50% here (a plain mistake, not
+   derived from the actual calc() value). */
+.battleHistoryInk {
+  position: absolute;
+  left: 28.23%;
+  /* Nudged up from -11.2% per explicit ask ("xích lên align ngang với
+     text") — live measurement at mobile width actually showed the ink's
+     own center already slightly ABOVE the "BATTLE HISTORY" title's
+     center (by ~19px), so this shift is taken on faith from the user's
+     direct visual read rather than re-derived from that measurement;
+     revisit if it still doesn't read as level. */
+  top: -15%;
+  width: 22.38%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.timelineTrack {
+  position: absolute;
+  left: 43.1%;
+  top: 16.7%;
+  width: 4.5%;
+  height: 83.3%;
+  pointer-events: none;
+}
+
+.timelineTrack svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.timelineList {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(24px, 4vw, 48px);
+}
+
+.timelineRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 24px;
+}
+
+.timelineYear {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 61px);
+  line-height: 1.05;
+  color: var(--ink-yellow);
+  text-align: center;
+  /* Column exactly fills its 1fr grid track with zero slack (text's own
+     natural single-line width ≈ the column width), so the text's right
+     edge lands flush on the lightning-bolt track's own left edge
+     (confirmed live via getBoundingClientRect — ~11px overlap at every
+     width tried). A `padding-right` here was tried first and rejected —
+     it shrinks the box's content width with zero slack to give, so the
+     year immediately wraps to 2 lines ("2018-" / "2019"). `transform`
+     moves the whole rendered box without touching its content width, so
+     it clears the track without triggering wrap. */
+  transform: translateX(-26px);
+}
+
+.timelineDetails {
+  display: flex;
+  flex-direction: column;
+}
+
+/* `var(--h3-size)` is a fixed 32px, same as .timelineYear used to be
+   before it got a clamp() — these two never did, so at mobile widths
+   (a ~half-width grid column, ~150px) 32px of the display font badly
+   overflows. Same clamp ceiling as .timelineYear (61px) isn't relevant here since
+   these were never THAT big, just matching the same "scale with
+   viewport, floor/ceiling at the current fixed value" treatment. */
+.timelineRole {
+  font-family: var(--font-display);
+  font-size: clamp(16px, 3.2vw, 32px);
+  line-height: var(--h3-line-height);
+  color: var(--ink-yellow);
+  margin: 0;
+}
+
+.timelineCompany {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: clamp(14px, 2.8vw, 32px);
+  line-height: 1.5;
+  color: var(--cream);
+  margin: 0;
+}
+
+/* ---------- Mobile (first pass) ---------- */
+@media (max-width: 767px) {
+  /* .figure's desktop aspect-ratio (1150:678, landscape) squeezed
+     everything — at a 375px-wide viewport that's only ~187px tall, not
+     nearly enough room for the title + both badge rows + the character
+     without severe overlap (confirmed live: the character's head
+     overlapped the title, both badge-label rows sat on top of the
+     character and overflowed past the screen edges horizontally).
+     Mobile restructures to a taller, vertically-stacked composition
+     instead of trying to cram the same wide layout into a short box:
+     title -> character -> a 2x2 badge grid below it. */
+  .figure {
+    aspect-ratio: 2 / 3;
+  }
+
+  .wordmarkWrap {
+    left: 12%;
+    top: 9%;
+    width: 76%;
+    height: 52%;
+  }
+
+  .riderPhotoAnchor {
+    left: 26%;
+    top: 15%;
+    width: 48%;
+    height: 40%;
+  }
+
+  .badge {
+    width: 24%;
+  }
+
+  .badgeLabel {
+    font-size: clamp(12px, 3.6vw, 20px);
+  }
+
+  .badgeAdvertising {
+    left: 16%;
+    top: 60%;
+  }
+
+  .badgeAi {
+    left: 60%;
+    top: 60%;
+  }
+
+  .badgeMotion {
+    left: 16%;
+    top: 82%;
+  }
+
+  .badgePhotoshoot {
+    left: 60%;
+    top: 82%;
+  }
+
+  /* .urCardRow's flex-wrap already stacks the card above the stats at
+     this width (confirmed live — card centers itself via
+     justify-content:center on the row) — but the STATS TEXT inside stays
+     left-aligned by default, which reads oddly once it's a centered
+     block instead of sitting beside the card. Desktop keeps left-align
+     (unchanged, not wrapped in this query). */
+  .urCardStats {
+    text-align: center;
+  }
+
+  /* ink-3's desktop position (left:4.04%, translateX(-50%)) was tuned
+     against the desktop layout where the card sits at the LEFT of a
+     side-by-side row — on mobile the card is centered above the stats
+     instead, so that position no longer lands anywhere near the card.
+     Re-measured live against the card's actual mobile rect (center
+     ~28% across, top edge ~12% down the .urCard container) instead of
+     guessing. */
+  .urCardInk {
+    left: 28%;
+    top: 12%;
+    width: 22%;
+  }
+
+  /* Desktop's left:28.23%/top:-15% was derived from Figma's fixed-canvas
+     offset and only ever verified against the title's OLD fixed 48px
+     font-size. The later `.sectionTitle` clamp(28px,9vw,48px) fix (see
+     project memory) shrinks "BATTLE HISTORY" a lot more on mobile than
+     the container itself shrinks, so the two drifted apart — the ink
+     splash floated above-left of the text instead of sitting behind/
+     level with it. Re-measured live against the title's ACTUAL mobile
+     rect (getBoundingClientRect at 375px) instead of reusing the
+     desktop-derived %s. */
+  .battleHistoryInk {
+    left: 15%;
+    top: -27%;
+    width: 67.14%;
+  }
+}

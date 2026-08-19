@@ -1,0 +1,36 @@
+:root {
+  /* Splatoon Vibe — brand tokens */
+  --ink-pink: #ff3d7f;
+  --ink-cyan: #00e5c7;
+  --ink-yellow: #ffe600;
+  --ink-purple: #8c4dff;
+  --dark-violet: #5619c4;
+  --ink-black: #15142b;
+  --cream: #faf6ec;
+  --white: #ffffff;
+  --stripe-yellow: #ffc61c;
+  --stripe-purple: #8645ff;
+  --stripe-pink: #ff0055;
+  /* Navbar's own hover-chip stripe — visually close to `--stripe-pink`
+     but a deliberately distinct hand-picked value (#ff0050 vs #ff0055),
+     not a duplicate to merge away. */
+  --nav-hover-stripe: #ff0050;
+  /* UR Card's "Special Abilities" bullet text — doesn't cleanly match
+     `--ink-pink`, kept as its own token rather than forced to match. */
+  --pink-soft: #fa9dff;
+
+  --font-display: 'Paytone One', system-ui, sans-serif;
+  --font-body: 'Paytone One', system-ui, sans-serif;
+  --font-caption: 'Elms Sans', system-ui, sans-serif;
+
+  /* Type scale, per Figma */
+  --h2-size: 48px;
+  --h2-line-height: 1.05; /* 48/105 */
+  --h3-size: 32px;
+  --h3-line-height: 1.1; /* 32/110 */
+
+  /* ~10% of viewport height — clamped so it stays usable at extreme
+     viewport heights, but any normal desktop window (640–960px tall)
+     gets pure 10vh. */
+  --nav-height: clamp(64px, 10vh, 96px);
+}

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="xmotiongraphi-Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 400 400">
+  <!-- Generator: Adobe Illustrator 30.2.1, SVG Export Plug-In . SVG Version: 2.1.1 Build 1)  -->
+  <defs>
+    <style>
+      .xmotiongraphi-st0 {
+        stroke: #ffe600;
+      }
+
+      .xmotiongraphi-st0, .xmotiongraphi-st1, .xmotiongraphi-st2, .xmotiongraphi-st3 {
+        fill: none;
+        stroke-miterlimit: 10;
+      }
+
+      .xmotiongraphi-st0, .xmotiongraphi-st2 {
+        stroke-width: 12.99px;
+      }
+
+      .xmotiongraphi-st1 {
+        stroke: #FFE600;
+        stroke-width: 1.89px;
+      }
+
+      .xmotiongraphi-st4 {
+        fill: #FF3D7F;
+      }
+
+      .xmotiongraphi-st2 {
+        stroke: #5619C4;
+      }
+
+      .xmotiongraphi-st5 {
+        fill: #FFE600;
+      }
+
+      .xmotiongraphi-st6 {
+        fill: url(#xmotiongraphi-linear-gradient);
+      }
+
+      .xmotiongraphi-st3 {
+        stroke: #FF3D7F;
+        stroke-width: 3.77px;
+      }
+    </style>
+    <linearGradient id="xmotiongraphi-linear-gradient" x1="118.44" y1="168.81" x2="285.72" y2="168.81" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FF3D7F" stop-opacity="0"/>
+      <stop offset=".04" stop-color="#FF3D7F" stop-opacity=".06"/>
+      <stop offset=".19" stop-color="#FF3D7F" stop-opacity=".31"/>
+      <stop offset=".35" stop-color="#FF3D7F" stop-opacity=".52"/>
+      <stop offset=".5" stop-color="#FF3D7F" stop-opacity=".69"/>
+      <stop offset=".64" stop-color="#FF3D7F" stop-opacity=".83"/>
+      <stop offset=".77" stop-color="#FF3D7F" stop-opacity=".92"/>
+      <stop offset=".9" stop-color="#FF3D7F" stop-opacity=".98"/>
+      <stop offset="1" stop-color="#FF3D7F"/>
+    </linearGradient>
+  </defs>
+  <g>
+    <g>
+      <rect class="xmotiongraphi-st4" x="97.24" y="149.46" width="39.72" height="39.72" transform="translate(154.02 -33.2) rotate(45)"/>
+      <rect class="xmotiongraphi-st4" x="265.52" y="149.46" width="39.72" height="39.72" transform="translate(203.31 -152.2) rotate(45)"/>
+      <rect class="xmotiongraphi-st6" x="118.1" y="159.89" width="167.28" height="17.84"/>
+    </g>
+    <path class="xmotiongraphi-st3" d="M104.8,295.65c39.3,0,47.06-78.52,100.19-78.52s44.4,78.52,95.83,78.52"/>
+    <g>
+      <line class="xmotiongraphi-st1" x1="173.7" y1="217.13" x2="230.31" y2="217.13"/>
+      <circle class="xmotiongraphi-st5" cx="230.31" cy="217.13" r="2.41"/>
+      <circle class="xmotiongraphi-st5" cx="173.72" cy="217.13" r="2.41"/>
+      <rect class="xmotiongraphi-st5" x="198.45" y="212.77" width="8.73" height="8.73"/>
+    </g>
+    <g>
+      <line class="xmotiongraphi-st1" x1="271.71" y1="295.65" x2="328.32" y2="295.65"/>
+      <rect class="xmotiongraphi-st5" x="296.46" y="291.29" width="8.73" height="8.73"/>
+      <circle class="xmotiongraphi-st5" cx="328.32" cy="295.65" r="2.41"/>
+      <circle class="xmotiongraphi-st5" cx="271.73" cy="295.65" r="2.41"/>
+    </g>
+    <g>
+      <rect class="xmotiongraphi-st5" x="99.89" y="291.29" width="8.73" height="8.73"/>
+      <line class="xmotiongraphi-st1" x1="75.15" y1="295.65" x2="131.75" y2="295.65"/>
+      <circle class="xmotiongraphi-st5" cx="131.75" cy="295.65" r="2.41"/>
+      <circle class="xmotiongraphi-st5" cx="75.17" cy="295.65" r="2.41"/>
+    </g>
+  </g>
+  <rect class="xmotiongraphi-st2" x="43.25" y="81.18" width="307" height="291.9" rx="51.57" ry="51.57"/>
+  <rect class="xmotiongraphi-st0" x="49.75" y="74.68" width="307" height="291.9" rx="51.57" ry="51.57"/>
+</svg>
