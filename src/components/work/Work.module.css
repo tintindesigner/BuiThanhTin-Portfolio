@@ -146,6 +146,15 @@
   scroll-margin-top: calc(var(--nav-height) + 24px);
 }
 
+/* Navbar is no longer fixed on mobile (see Navbar.module.css) — it
+   scrolls away with the page instead of overlaying this title, so only
+   the plain breathing-room amount is needed here too. */
+@media (max-width: 767px) {
+  .category {
+    scroll-margin-top: 24px;
+  }
+}
+
 .categoryTitle {
   font-family: var(--font-display);
   font-size: clamp(20px, 2.6vw, var(--h3-size));

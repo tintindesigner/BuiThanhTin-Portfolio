@@ -1,8 +1,3 @@
-/* .nav has no fixed height — it's whatever its children (the fixed-height
-   top row + the collapsible mobile-links block) add up to, so opening the
-   mobile menu grows this same bar taller instead of showing a separate
-   box below it. `border-radius` lives on this outer element so the
-   rounded-bottom shape follows however tall it currently is. */
 .nav {
   position: fixed;
   top: 0;
@@ -15,6 +10,16 @@
   border-radius: 0 0 48px 48px;
   background: var(--dark-violet);
   isolation: isolate;
+}
+
+/* Mobile: this bar no longer carries navigation (that's `.mobileTabBar`
+   below) — just the logo — and isn't pinned anymore, so it scrolls away
+   with the page like a normal header instead of staying fixed on top of
+   content. Explicit ask. */
+@media (max-width: 767px) {
+  .nav {
+    position: static;
+  }
 }
 
 .navTopRow {
@@ -180,64 +185,42 @@
   transform: scaleX(1);
 }
 
-.hamburger {
-  display: none;
-  flex-direction: column;
-  gap: 5px;
-  width: 32px;
-  padding: 8px 4px;
-}
-
-.hamburger span {
-  display: block;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--ink-yellow);
-  transition: transform 0.25s ease, opacity 0.2s ease;
-}
-
-.hamburger[data-open='true'] span:nth-child(1) {
-  transform: translateY(8px) rotate(45deg);
-}
-.hamburger[data-open='true'] span:nth-child(2) {
-  opacity: 0;
-}
-.hamburger[data-open='true'] span:nth-child(3) {
-  transform: translateY(-8px) rotate(-45deg);
-}
-
-.mobileLinks {
+/* Mobile bottom tab bar — app-style: fixed to the viewport (not `.nav`'s
+   flow, which scrolled away above), always showing all 4 destinations
+   directly rather than behind a hamburger toggle. `translateY` (not
+   `display`) drives the show/hide so the slide transition below actually
+   has something to animate — Navbar.tsx toggles `data-visible` based on
+   scroll direction + an eligibility check (not shown before About). */
+.mobileTabBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 500;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  max-height: 0;
-  padding: 0;
-  opacity: 0;
-  overflow: hidden;
-  pointer-events: none;
-  transition:
-    max-height 0.3s ease,
-    padding 0.3s ease,
-    opacity 0.2s ease;
+  justify-content: space-around;
+  height: clamp(40px, 6vh, 64px);
+  padding: 0 clamp(12px, 4vw, 24px);
+  border-radius: 24px 24px 0 0;
+  background: var(--dark-violet);
+  isolation: isolate;
+  transform: translateY(0);
+  transition: transform 0.3s ease;
 }
 
-.mobileLinks[data-open='true'] {
-  max-height: 420px;
-  padding: 8px 0 28px;
-  opacity: 1;
-  pointer-events: auto;
+.mobileTabBar[data-visible='false'] {
+  transform: translateY(100%);
 }
 
-.mobileLinks .linkButton {
-  font-size: 20px;
+.mobileTabBar .linkButton {
+  font-size: 14px;
 }
 
-@media (max-width: 767px) {
-  .links {
-    display: none;
-  }
-  .hamburger {
-    display: flex;
-  }
+/* The Home tab renders an icon instead of a text label (explicit ask) —
+   sized/centered independent of the text labels' own line-height. */
+.mobileTabBar .linkItem:first-child .linkLabel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

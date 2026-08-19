@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { MouseEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import Logo from '../assets/svg/logo.svg?react'
@@ -16,12 +16,30 @@ const LINKS = [
   { id: 'contact', label: 'Contact' },
 ]
 
+// Simple outline glyph, not one of the illustrated Splatoon-style badge
+// icons elsewhere in the project (advertising-icon.svg etc.) — those are
+// drawn/detailed for ~60-150px display; at the tab bar's compact size a
+// glyph this plain reads far more cleanly. `currentColor` so it inherits
+// `.linkLabel`'s color (incl. its hover/active transitions) for free.
+function HomeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true">
+      <path
+        d="M3.5 11 12 4l8.5 7M6 9.5V19a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V9.5M10 20v-5.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V20"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
 interface NavbarProps {
   activeId?: string
 }
 
 export default function Navbar({ activeId = 'home' }: NavbarProps) {
-  const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
   const onHomePage = location.pathname === '/'
@@ -32,19 +50,45 @@ export default function Navbar({ activeId = 'home' }: NavbarProps) {
   // `transform` shorthand) so this transitions on its own fast timing,
   // independent of the slower elastic `scale` pop-in on the same element.
   const { onMouseMove: handleMouseMove, onMouseLeave: handleMouseLeave } = useCursorTilt()
-  // Only one of `.links`/`.mobileLinks` is ever visible at a time (CSS
-  // hides the other via display:none/max-height, same 767px breakpoint as
-  // the hamburger switch below) — rendering both unconditionally used to
-  // mean 8 always-on `StripedBackground` hover-chips (4 per variant), each
-  // running its own independent rAF loop, with half of them permanently
-  // wasted on every single page load. Only mounting the actually-visible
-  // variant halves that to 4.
   const isMobile = useMediaQuery('(max-width: 767px)')
 
-  // `mobile` links are only ever visually reachable while the panel is
-  // open (CSS hides it otherwise via max-height/opacity, not display:none),
-  // so tabIndex has to be toggled in step with `menuOpen` here — the CSS
-  // hiding alone doesn't stop them being Tab-focused while off-screen.
+  // Mobile bottom tab bar: hidden until the user scrolls UP, and only
+  // ever eligible to show once they've scrolled to (or past) About — the
+  // top of `/` is Hero's own full-bleed scene with its own big "CLICK TO
+  // UNBOX" call-to-action, which a persistent bottom bar would clutter.
+  // Pages with no `#about` at all (case-study pages) have no such
+  // exclusion zone, so they're eligible from the start — only the scroll-
+  // direction condition applies there.
+  const [barVisible, setBarVisible] = useState(false)
+  const lastScrollYRef = useRef(0)
+
+  useEffect(() => {
+    if (!isMobile) return
+    lastScrollYRef.current = window.scrollY
+    let ticking = false
+    const handleScroll = () => {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        const y = window.scrollY
+        const last = lastScrollYRef.current
+        const aboutEl = document.getElementById('about')
+        const eligible = !aboutEl || y >= aboutEl.getBoundingClientRect().top + y
+        if (!eligible) {
+          setBarVisible(false)
+        } else if (y < last - 4) {
+          setBarVisible(true)
+        } else if (y > last + 4) {
+          setBarVisible(false)
+        }
+        lastScrollYRef.current = y
+        ticking = false
+      })
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [isMobile])
+
   // Native `href="#home"` anchor scrolling doesn't reliably reach actual
   // document top:0 — `.hero` is `position:sticky` (see Hero.tsx), so for
   // ANY scrollY between 0 and the sticky-release point, its own
@@ -68,14 +112,13 @@ export default function Navbar({ activeId = 'home' }: NavbarProps) {
   // anchor-scroll trouble for `#home` itself (see goHome above), and
   // that same layout quirk turned out to throw off anchor-scroll to
   // the OTHER sections too on a fresh page load, not just `#home`.
-  const renderLink = (id: string, label: string, mobile = false) => (
+  const renderLink = (id: string, label: string, iconOnly = false) => (
     <div className={styles.linkItem} data-active={activeId === id} key={id}>
       <a
         href={onHomePage ? `#${id}` : '/'}
         className={styles.linkButton}
-        tabIndex={mobile && !menuOpen ? -1 : undefined}
+        aria-label={iconOnly && id === 'home' ? label : undefined}
         onClick={(e) => {
-          setMenuOpen(false)
           if (onHomePage) {
             if (id === 'home') goHome(e)
             return
@@ -102,59 +145,45 @@ export default function Navbar({ activeId = 'home' }: NavbarProps) {
             </div>
           </div>
         </span>
-        <span className={styles.linkLabel}>{label}</span>
+        <span className={styles.linkLabel}>{iconOnly && id === 'home' ? <HomeIcon /> : label}</span>
         <span className={styles.underline} aria-hidden="true" />
       </a>
     </div>
   )
 
   return (
-    <nav className={styles.nav}>
-      <div className={styles.navTopRow}>
-        <a
-          href="/"
-          className={styles.logoLink}
-          aria-label="Tin Tin — home"
-          onClick={(e) => {
-            if (onHomePage) {
-              goHome(e)
-            } else {
-              e.preventDefault()
-              navigate('/')
-            }
-          }}
-        >
-          <Logo className={styles.logo} />
-        </a>
+    <>
+      <nav className={styles.nav} aria-label="Site">
+        <div className={styles.navTopRow}>
+          <a
+            href="/"
+            className={styles.logoLink}
+            aria-label="Tin Tin — home"
+            onClick={(e) => {
+              if (onHomePage) {
+                goHome(e)
+              } else {
+                e.preventDefault()
+                navigate('/')
+              }
+            }}
+          >
+            <Logo className={styles.logo} />
+          </a>
 
-        {!isMobile && (
-          <div className={styles.links}>
-            {LINKS.map((l) => renderLink(l.id, l.label))}
-          </div>
-        )}
-
-        <button
-          type="button"
-          className={styles.hamburger}
-          data-open={menuOpen}
-          aria-label="Toggle menu"
-          aria-expanded={menuOpen}
-          onClick={() => setMenuOpen((v) => !v)}
-        >
-          <span />
-          <span />
-          <span />
-        </button>
-      </div>
-
-      {/* Grows the SAME bar downward when open (max-height transition on
-          this element; .nav has no fixed height of its own, so it just
-          follows) rather than showing a separate panel below the bar. */}
-      {isMobile && (
-        <div className={styles.mobileLinks} data-open={menuOpen}>
-          {LINKS.map((l) => renderLink(l.id, l.label, true))}
+          {!isMobile && (
+            <div className={styles.links}>
+              {LINKS.map((l) => renderLink(l.id, l.label))}
+            </div>
+          )}
         </div>
+      </nav>
+
+      {isMobile && (
+        <nav className={styles.mobileTabBar} data-visible={barVisible} aria-label="Mobile navigation">
+          {LINKS.map((l) => renderLink(l.id, l.label, true))}
+        </nav>
       )}
-    </nav>
+    </>
   )
 }

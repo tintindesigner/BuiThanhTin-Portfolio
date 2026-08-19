@@ -6,6 +6,16 @@
   overflow: hidden;
 }
 
+/* Navbar is no longer `position: fixed` on mobile (it scrolls away with
+   the page instead — see Navbar.module.css), so it no longer overlays
+   this page's own top content and doesn't need to be cleared anymore —
+   just the plain breathing-room amount. */
+@media (max-width: 767px) {
+  .page {
+    padding-top: clamp(32px, 5vw, 56px);
+  }
+}
+
 /* Ink `left`/`right` % values are computed relative to the JOB CARD's
    own width (1216px in Figma, always inset 112px from each edge of the
    1440px page canvas there), NOT the full page — this frame reproduces
