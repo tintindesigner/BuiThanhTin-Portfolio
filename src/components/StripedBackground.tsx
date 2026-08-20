@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import styles from './StripedBackground.module.css'
@@ -45,8 +45,13 @@ export default function StripedBackground({
 }: StripedBackgroundProps) {
   const patternId = `sb-pattern-${useId()}`
   const patternRef = useRef<SVGPatternElement>(null)
+  const wrapRef = useRef<HTMLDivElement>(null)
   const resolvedStripe = stripe ?? `color-mix(in srgb, ${bg} 80%, black)`
   const reduceMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
+  // Starts true so the very first paint (before the observer's first
+  // callback lands) still animates instead of momentarily freezing — most
+  // instances mount already in or near the viewport anyway.
+  const [isVisible, setIsVisible] = useState(true)
 
   // Fixed at all viewport sizes (no responsive halving below 768px) — the
   // Hero is desktop-first for now (see project memory), so there's no
@@ -67,8 +72,19 @@ export default function StripedBackground({
   // browser support for long-running animations is inconsistent enough
   // that it isn't trusted here for something that needs to loop
   // indefinitely without degrading.
+  //
+  // Paused via `isVisible` below (IntersectionObserver) whenever this
+  // instance scrolls out of view — with ~7 of these mounted on the home
+  // page at once, every one of them writing `patternTransform` every
+  // single frame forever (even off-screen) is a real, measured CPU cost
+  // on Safari specifically, whose SVG pattern retiling is much more
+  // expensive than Chromium's. Safe to just stop/restart the loop rather
+  // than tracking any paused-at offset: `offset` is always derived from
+  // wall-clock elapsed time against the shared epoch, never accumulated
+  // frame-to-frame, so resuming lands on the exact position the pattern
+  // would already be at — no jump, no drift.
   useEffect(() => {
-    if (reduceMotion) return
+    if (reduceMotion || !isVisible) return
     const pattern = patternRef.current
     if (!pattern) return
     const durationMs = speed * 1000
@@ -81,10 +97,20 @@ export default function StripedBackground({
     }
     rafId = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(rafId)
-  }, [reduceMotion, speed, period, rotation])
+  }, [reduceMotion, isVisible, speed, period, rotation])
+
+  useEffect(() => {
+    const el = wrapRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(([entry]) => setIsVisible(entry.isIntersecting), {
+      rootMargin: '200px',
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   return (
-    <div className={[styles.wrap, className].filter(Boolean).join(' ')} style={styleProp}>
+    <div ref={wrapRef} className={[styles.wrap, className].filter(Boolean).join(' ')} style={styleProp}>
       <svg className={styles.stripes} aria-hidden="true">
         <defs>
           <pattern
