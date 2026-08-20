@@ -457,7 +457,7 @@
 }
 
 /* ---------- Mobile (first pass) ---------- */
-@media (max-width: 767px) {
+@media (max-width: 767px), (max-height: 500px) and (orientation: landscape) {
   /* .figure's desktop aspect-ratio (1150:678, landscape) squeezed
      everything — at a 375px-wide viewport that's only ~187px tall, not
      nearly enough room for the title + both badge rows + the character

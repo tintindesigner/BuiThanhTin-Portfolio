@@ -10,7 +10,7 @@
    Navbar.module.css), just 2/3 the height there, so it overlays this
    page's own top content the same way; the compensation just needs to
    match that shorter height instead of the desktop one. */
-@media (max-width: 767px) {
+@media (max-width: 767px), (max-height: 500px) and (orientation: landscape) {
   .page {
     padding-top: calc(var(--nav-height) * 2 / 3 + clamp(32px, 5vw, 56px));
   }

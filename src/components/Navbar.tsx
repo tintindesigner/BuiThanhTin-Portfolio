@@ -7,6 +7,7 @@ import StripedBackground from './StripedBackground'
 import { HOVER_CHIP_CLIP_PATH } from './hoverChipGeometry'
 import { useCursorTilt } from '../hooks/useCursorTilt'
 import { useMediaQuery } from '../hooks/useMediaQuery'
+import { MOBILE_MEDIA_QUERY } from '../lib/breakpoints'
 import styles from './Navbar.module.css'
 
 const LINKS = [
@@ -51,7 +52,7 @@ export default function Navbar({ activeId = 'home' }: NavbarProps) {
   // `transform` shorthand) so this transitions on its own fast timing,
   // independent of the slower elastic `scale` pop-in on the same element.
   const { onMouseMove: handleMouseMove, onMouseLeave: handleMouseLeave } = useCursorTilt()
-  const isMobile = useMediaQuery('(max-width: 767px)')
+  const isMobile = useMediaQuery(MOBILE_MEDIA_QUERY)
 
   // Mobile: the top bar stays `position: fixed` (back to how it always
   // was — the earlier `absolute`/scrolls-away experiment kept causing a
