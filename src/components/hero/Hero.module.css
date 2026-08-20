@@ -15,20 +15,3 @@
   min-height: 560px;
   overflow: hidden;
 }
-
-/* `min-height: 560px` above is a floor against a short-but-still-roughly-
-   desktop-shaped window (undocumented in the codebase before this comment,
-   but harmless there — no real desktop browser window gets anywhere near
-   that short) — on a landscape phone (real height ~375-430px) it does the
-   opposite of its own intent: it forces Hero to stay taller than the
-   entire actual viewport, so content sized as a % of Hero's own height
-   (badges, burst, box) overflows past the top/bottom of what's visible,
-   even after Navbar/HeroDecor's own mobile-layout fix for this same
-   landscape case (see MOBILE_MEDIA_QUERY in src/lib/breakpoints.ts).
-   Dropping the floor here lets Hero genuinely shrink to the real
-   (short) 100vh instead of insisting on 560px it doesn't have. */
-@media (max-width: 767px), (max-height: 500px) and (orientation: landscape) {
-  .hero {
-    min-height: 0;
-  }
-}

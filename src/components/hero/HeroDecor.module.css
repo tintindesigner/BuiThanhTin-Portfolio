@@ -244,25 +244,15 @@
    Same 767px breakpoint as the navbar's hamburger switch, for
    consistency. Badges and ink splats below have their own verified
    mobile overrides too. */
-@media (max-width: 767px), (max-height: 500px) and (orientation: landscape) {
+@media (max-width: 767px) {
   .boxAnchor {
     left: 50%;
   }
 
-  /* `min(58%, 40vh)`, not a plain `58%` — this mobile override was tuned
-     against a narrow PORTRAIT phone, where 58% of a small width comfortably
-     fits a much taller viewport. On a landscape phone (this same media
-     query also matches short+wide, see MOBILE_MEDIA_QUERY), width is the
-     abundant dimension instead — 58% of a wide landscape width overflowed
-     the actual (short) viewport by ~130px (confirmed live: `.burstWrap`
-     rendered top at -129px). Capping by whichever of width/height is
-     smaller keeps portrait's existing look completely unchanged (width
-     stays the binding constraint there) while bounding it correctly in
-     landscape too. */
   .burstWrap {
     left: 50%;
     top: 23%;
-    width: min(58%, 40vh);
+    width: 58%;
   }
 
   .buyAnchor {
@@ -271,13 +261,10 @@
     width: 36%;
   }
 
-  /* Same `min(%, vh)` reasoning as `.burstWrap` above — confirmed live,
-     the plain `50%` overflowed the bottom of a landscape phone viewport
-     by ~110px. */
   .unboxAnchor {
     left: 50%;
     top: 73%;
-    width: min(50%, 45vh);
+    width: 50%;
     transform: translate(-50%, -50%) rotate(10deg);
   }
 

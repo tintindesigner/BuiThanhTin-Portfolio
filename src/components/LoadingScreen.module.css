@@ -20,12 +20,7 @@
 
 /* Mobile-only hint (per Figma's mobile-specific frame — the desktop frame
    has no equivalent block at all) — a suggestion, not a hard requirement,
-   so it's purely decorative/informational, no orientation-lock logic.
-   Deliberately kept to plain portrait-width `max-width:767px`, NOT the
-   shared `MOBILE_MEDIA_QUERY` (see src/lib/breakpoints.ts) that every
-   other mobile breakpoint in the project now uses — that constant ALSO
-   matches a landscape phone, and showing "rotate your phone" while it's
-   already in landscape would be backwards. */
+   so it's purely decorative/informational, no orientation-lock logic. */
 .rotateHint {
   display: none;
   flex-direction: column;

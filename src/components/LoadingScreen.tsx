@@ -29,13 +29,6 @@ interface LoadingScreenProps {
 
 export default function LoadingScreen({ heroReady, onDone }: LoadingScreenProps) {
   const { progress } = useProgress()
-  // Plain portrait-width check, NOT the shared MOBILE_MEDIA_QUERY (see
-  // src/lib/breakpoints.ts) — this only gates how long to hold the
-  // overlay open for reading the rotate-hint (LoadingScreen.module.css's
-  // `.rotateHint`), which itself only ever shows at this same plain
-  // `max-width:767px` condition (deliberately excludes landscape, see
-  // that file) — a landscape phone getting the longer mobile floor for a
-  // hint it will never see would just be a pointless extra wait.
   const isMobile = useMediaQuery('(max-width: 767px)')
   const [fontsReady, setFontsReady] = useState(false)
   const [minTimeElapsed, setMinTimeElapsed] = useState(false)

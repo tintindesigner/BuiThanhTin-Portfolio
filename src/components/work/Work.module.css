@@ -197,7 +197,7 @@
    shrunk down to its 8px "past Hero" sliver — comfortably covered by
    the plain 24px breathing-room amount alone, no full-height term
    needed here. */
-@media (max-width: 767px), (max-height: 500px) and (orientation: landscape) {
+@media (max-width: 767px) {
   .category {
     scroll-margin-top: 24px;
   }

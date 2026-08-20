@@ -25,7 +25,7 @@
    `navShrunk`, only ever true on `/` — no Hero to shrink away from on a
    case-study page). Square corners while shrunk — 48px rounding on an
    8px sliver would read as broken, not intentional. */
-@media (max-width: 767px), (max-height: 500px) and (orientation: landscape) {
+@media (max-width: 767px) {
   .nav[data-shrunk='true'] {
     border-radius: 0;
   }
@@ -43,7 +43,7 @@
    query further up) — same selector + same media condition would
    otherwise lose to the later, unconditional base rule on source order,
    since specificity is identical either way. */
-@media (max-width: 767px), (max-height: 500px) and (orientation: landscape) {
+@media (max-width: 767px) {
   .navTopRow {
     height: calc(var(--nav-height) * 2 / 3);
     overflow: hidden;
@@ -270,7 +270,7 @@
   font-size: 20px;
 }
 
-@media (max-width: 767px), (max-height: 500px) and (orientation: landscape) {
+@media (max-width: 767px) {
   .hamburger {
     display: flex;
   }

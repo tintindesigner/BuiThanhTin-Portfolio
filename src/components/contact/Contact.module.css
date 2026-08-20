@@ -70,7 +70,7 @@
 
 /* Both left-aligned on mobile — explicit ask — instead of phone staying
    right-aligned once the row wraps to a stack. */
-@media (max-width: 767px), (max-height: 500px) and (orientation: landscape) {
+@media (max-width: 767px) {
   .detailRight {
     text-align: left;
     margin-left: 0;
