@@ -1,7 +1,19 @@
-/* `overflow-x: hidden` only (not the shorthand `overflow`) — the ribbon
-   bands intentionally spill past this section's own TOP/BOTTOM edge (see
-   `.ribbon`), which must stay uncropped; only the horizontal bleed needs
-   containing. This used to be handled by a global `overflow-x: hidden`
+/* `clip-path`, not `overflow-x: hidden` — the ribbon bands intentionally
+   spill past this section's own TOP/BOTTOM edge (see `.ribbon`), which
+   must stay uncropped; only the horizontal bleed needs containing.
+   `overflow-x`/`overflow-y` can't do that on their own: per the CSS
+   overflow spec, whenever one axis computes to non-`visible`, the other
+   is silently forced to `auto` too — confirmed live, `overflow-x: hidden`
+   alongside an explicit `overflow-y: visible` still computed `overflow-y`
+   as `"auto"`, which clipped the ribbon's vertical bleed at `.work`'s own
+   top edge (`.workBand`'s top sat ~93px above `.work`'s own top and was
+   being cut there). There is no way to get one real `hidden` axis and
+   one real `visible` axis through `overflow-x`/`overflow-y` on the same
+   element. `clip-path: inset()` has no such pairing rule, so a large
+   negative top/bottom inset (far past any realistic vertical bleed) next
+   to a real 0 left/right inset clips ONLY the horizontal axis, which is
+   all this section actually needs.
+   This horizontal clip used to be handled by a global `overflow-x: hidden`
    on `html` in global.css, which worked but had a real side effect: any
    non-`visible` overflow on `html` breaks Hero's `position: sticky` (its
    scroll-pin stopped clamping partway through, leaving a visible gap
@@ -10,7 +22,7 @@
    Hero's sticky positioning at all. */
 .work {
   position: relative;
-  overflow-x: hidden;
+  clip-path: inset(-9999px 0);
 }
 
 /* ---------- Ribbon divider ("WORK.../ARE YOU READY?") ----------
