@@ -18,50 +18,6 @@
   padding: 24px;
 }
 
-/* Mobile-only hint (per Figma's mobile-specific frame — the desktop frame
-   has no equivalent block at all) — a suggestion, not a hard requirement,
-   so it's purely decorative/informational, no orientation-lock logic. */
-.rotateHint {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-@media (max-width: 767px) {
-  .rotateHint {
-    display: flex;
-  }
-}
-
-.rotateIconStack {
-  position: relative;
-  width: clamp(90px, 28vw, 150px);
-  aspect-ratio: 178.02 / 175.653;
-}
-
-/* Arrows + phone are two separate SVGs (same viewBox, so they line up
-   exactly) stacked in the same box instead of one flat icon, so each can
-   be animated independently — see the GSAP timeline in LoadingScreen.tsx.
-   `transform-box:fill-box` makes `rotate` pivot around each SVG's own
-   visual center instead of the default view-box-origin corner. */
-.rotateIcon {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
-.rotateLine {
-  font-family: var(--font-caption);
-  font-size: 18px;
-  color: var(--cream);
-  text-align: center;
-  margin: 0;
-}
-
 .progressTrack {
   position: relative;
   width: min(85vw, 500px);
