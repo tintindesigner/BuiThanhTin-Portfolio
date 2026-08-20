@@ -13,6 +13,57 @@
   height: 100%;
   display: block;
   pointer-events: none;
+  /* Root <svg> elements clip to their own box by default (UA stylesheet
+     `overflow: hidden`) — relied on below to contain `.stripesFill`'s
+     150% oversize without an explicit rule here. */
+}
+
+/* The moving part — a plain CSS `animation` on `transform` instead of a
+   JS `requestAnimationFrame` loop writing the SVG `patternTransform`
+   attribute every frame. `transform`/`opacity` are the two CSS properties
+   every engine can animate compositor-only (skips layout AND paint per
+   frame); rewriting `patternTransform` cannot be, since changing how a
+   pattern tiles forces an actual repaint of the fill every time. With
+   ~7 of these mounted on the home page at once, that per-frame repaint
+   was a real, measured cost on Safari specifically (its SVG pattern
+   retiling is much pricier than Chromium's) — this removes the per-frame
+   browser work entirely, on every engine, not just Safari.
+
+   The keyframes below are `rotate(R) translateX(offset) rotate(-R)`, not
+   a plain `translateX` — two rotations by the same angle in opposite
+   directions cancel exactly (`Rot(R)·Rot(-R) = Identity`, true for ANY
+   shared pivot point, so this doesn't depend on `transform-origin`),
+   which means this element's OWN rendered shape never actually rotates
+   at all and needs no rotation-driven oversizing margin. But because the
+   translation happens BETWEEN the two rotations rather than outside them,
+   its net effect on every point is `p ↦ p + (offset·cosR, offset·sinR)`
+   — a straight-line shift ALONG the R-degree direction, not a plain
+   horizontal one. Combined with the `<pattern>`'s own static
+   `patternTransform="rotate(R)"` (which makes the bars diagonal in the
+   first place, and needs no oversizing either since it only rotates the
+   pattern's internal tile mapping, not this rect's geometry), the two
+   together reproduce the exact same "flows along its own diagonal" look
+   the old rAF version had — worked out on paper before implementing,
+   not guessed. `x/y/width/height` are oversized 25% past this element's
+   own box on every side (`.stripes`'s default SVG clip contains the
+   overflow) purely to cover that small diagonal translation itself —
+   comfortably more than the largest `period` used anywhere on this site
+   (120px main sections / 22px hover chips) relative to how small either
+   actually is against its own container. */
+.stripesFill {
+  animation-name: sb-slide;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+
+@keyframes sb-slide {
+  from {
+    transform: rotate(var(--sb-rotation)) translateX(0) rotate(calc(-1 * var(--sb-rotation)));
+  }
+  to {
+    transform: rotate(var(--sb-rotation)) translateX(var(--sb-period)) rotate(calc(-1 * var(--sb-rotation)));
+  }
 }
 
 .content {

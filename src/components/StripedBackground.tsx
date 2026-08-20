@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import styles from './StripedBackground.module.css'
@@ -44,7 +44,6 @@ export default function StripedBackground({
   children,
 }: StripedBackgroundProps) {
   const patternId = `sb-pattern-${useId()}`
-  const patternRef = useRef<SVGPatternElement>(null)
   const wrapRef = useRef<HTMLDivElement>(null)
   const resolvedStripe = stripe ?? `color-mix(in srgb, ${bg} 80%, black)`
   const reduceMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
@@ -61,44 +60,22 @@ export default function StripedBackground({
   const period = w + g
   const rotation = -angle
 
-  // Drawn as an SVG <pattern> of plain VERTICAL bars, tilted with
-  // patternTransform, rather than a CSS repeating-linear-gradient — a
-  // gradient painted across the whole hero is prone to a GPU texture-wrap
-  // defect on some drivers where large animated gradients visibly fold
-  // into a mirrored "V" instead of repeating cleanly.
-  //
-  // The scroll is driven by a plain requestAnimationFrame loop writing
-  // `patternTransform` directly, not SMIL `<animateTransform>` — SMIL's
-  // browser support for long-running animations is inconsistent enough
-  // that it isn't trusted here for something that needs to loop
-  // indefinitely without degrading.
-  //
-  // Paused via `isVisible` below (IntersectionObserver) whenever this
-  // instance scrolls out of view — with ~7 of these mounted on the home
-  // page at once, every one of them writing `patternTransform` every
-  // single frame forever (even off-screen) is a real, measured CPU cost
-  // on Safari specifically, whose SVG pattern retiling is much more
-  // expensive than Chromium's. Safe to just stop/restart the loop rather
-  // than tracking any paused-at offset: `offset` is always derived from
-  // wall-clock elapsed time against the shared epoch, never accumulated
-  // frame-to-frame, so resuming lands on the exact position the pattern
-  // would already be at — no jump, no drift.
-  useEffect(() => {
-    if (reduceMotion || !isVisible) return
-    const pattern = patternRef.current
-    if (!pattern) return
-    const durationMs = speed * 1000
-    let rafId: number
-    const tick = (now: number) => {
-      const elapsed = (now - SHARED_PATTERN_EPOCH) % durationMs
-      const offset = (elapsed / durationMs) * period
-      pattern.setAttribute('patternTransform', `rotate(${rotation}) translate(${offset} 0)`)
-      rafId = requestAnimationFrame(tick)
-    }
-    rafId = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(rafId)
-  }, [reduceMotion, isVisible, speed, period, rotation])
+  // A negative `animation-delay` "seeks" the CSS animation to wherever it
+  // would already be if it had been running since the shared epoch —
+  // computed ONCE (not every frame, unlike the old rAF version) and left
+  // alone; pausing/resuming via `animation-play-state` below preserves
+  // this seek natively (the browser remembers the animation's current
+  // time across a pause), so instances don't need to re-derive it.
+  const animationDelay = useMemo(() => {
+    const elapsed = (performance.now() - SHARED_PATTERN_EPOCH) % (speed * 1000)
+    return `-${elapsed}ms`
+  }, [speed])
 
+  // Paused whenever this instance scrolls out of view — with ~7 of these
+  // mounted on the home page at once, a moving background running
+  // indefinitely (even off-screen) is a real, measured CPU cost on
+  // Safari specifically. See the `.stripesFill` comment in the CSS module
+  // for why this no longer costs anything even while genuinely running.
   useEffect(() => {
     const el = wrapRef.current
     if (!el) return
@@ -109,12 +86,19 @@ export default function StripedBackground({
     return () => observer.disconnect()
   }, [])
 
+  const fillStyle = {
+    '--sb-rotation': `${rotation}deg`,
+    '--sb-period': `${period}px`,
+    animationDuration: `${speed}s`,
+    animationDelay,
+    animationPlayState: reduceMotion || !isVisible ? 'paused' : 'running',
+  } as CSSProperties
+
   return (
     <div ref={wrapRef} className={[styles.wrap, className].filter(Boolean).join(' ')} style={styleProp}>
       <svg className={styles.stripes} aria-hidden="true">
         <defs>
           <pattern
-            ref={patternRef}
             id={patternId}
             patternUnits="userSpaceOnUse"
             width={period}
@@ -125,7 +109,7 @@ export default function StripedBackground({
           </pattern>
         </defs>
         <rect x={0} y={0} width="100%" height="100%" fill={bg} />
-        <rect x={0} y={0} width="100%" height="100%" fill={`url(#${patternId})`} />
+        <rect x="-25%" y="-25%" width="150%" height="150%" fill={`url(#${patternId})`} className={styles.stripesFill} style={fillStyle} />
       </svg>
       {children && <div className={styles.content}>{children}</div>}
     </div>
