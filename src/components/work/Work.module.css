@@ -1,48 +1,74 @@
-/* `clip-path`, not `overflow-x: hidden` — the ribbon bands intentionally
-   spill past this section's own TOP/BOTTOM edge (see `.ribbon`), which
-   must stay uncropped; only the horizontal bleed needs containing.
-   `overflow-x`/`overflow-y` can't do that on their own: per the CSS
-   overflow spec, whenever one axis computes to non-`visible`, the other
-   is silently forced to `auto` too — confirmed live, `overflow-x: hidden`
-   alongside an explicit `overflow-y: visible` still computed `overflow-y`
-   as `"auto"`, which clipped the ribbon's vertical bleed at `.work`'s own
-   top edge (`.workBand`'s top sat ~93px above `.work`'s own top and was
-   being cut there). There is no way to get one real `hidden` axis and
-   one real `visible` axis through `overflow-x`/`overflow-y` on the same
-   element. `clip-path: inset()` has no such pairing rule, so a large
-   negative top/bottom inset (far past any realistic vertical bleed) next
-   to a real 0 left/right inset clips ONLY the horizontal axis, which is
-   all this section actually needs.
-   This horizontal clip used to be handled by a global `overflow-x: hidden`
-   on `html` in global.css, which worked but had a real side effect: any
-   non-`visible` overflow on `html` breaks Hero's `position: sticky` (its
-   scroll-pin stopped clamping partway through, leaving a visible gap
-   before About — see the long comment on `html` in global.css). `.work`
-   is a sibling of Hero, not an ancestor, so clipping here can't affect
-   Hero's sticky positioning at all. */
+/* No clip/overflow needed directly on `.work` itself — both things that
+   used to bleed past its box are now self-contained lower down:
+   `.pinkPeak` already clips itself (`overflow:hidden`, same size as
+   `.work`, doesn't bleed), and the ribbon bands now clip themselves via
+   `.ribbonBleed` below. Neither `overflow-x`/`overflow-y` nor
+   `clip-path` on `.work` worked for the ribbon alone, for two DIFFERENT
+   reasons (both cost a real regression, read both before reintroducing
+   either):
+   - `overflow-x: hidden` alone forces `overflow-y` to compute as `auto`
+     too, per the CSS overflow spec's axis-pairing rule — even with an
+     explicit `overflow-y: visible` written right next to it. That
+     silently clipped the ribbon's intentional vertical bleed at `.work`'s
+     own top edge (confirmed live: `.workBand`'s top sat ~93px above
+     `.work`'s own top, cut off there). See [[r3f-css-gotchas]] #26.
+   - Swapping to `clip-path: inset(-9999px 0)` "fixed" that (clip-path
+     has no axis-pairing rule), but `clip-path` is a PAINT-time-only
+     clip — it does NOT contain layout overflow, so the ribbon's real
+     horizontal bleed (180%-wide rotated bands) still inflated
+     `document.documentElement.scrollWidth`, reintroducing the exact
+     mobile horizontal-overflow bug this project already fixed once
+     before (see the "Real mobile horizontal-overflow bug" history — the
+     original `overflow-x:hidden`-on-`.work` fix worked specifically
+     because `overflow` (unlike `clip-path`) genuinely contains layout,
+     not just paint). */
 .work {
   position: relative;
-  clip-path: inset(-9999px 0);
 }
 
 /* ---------- Ribbon divider ("WORK.../ARE YOU READY?") ----------
    Sits on the section's own purple background; `.pinkPeak` below is
-   the pink overlay. `overflow: visible` lets the bands spill freely
-   past this box's own edges, scaling with `.ribbon`'s own responsive
-   height. Each band is wider than its own wrapper (180%) so rotating
-   it never reveals a gap at the edges, even at very wide viewports.
-
-   Both bands pivot around the EXACT SAME point (`left`/`top` below,
-   equal to `.pinkPeak`'s own apex) rather than each having its own
-   `top` — two lines only cross at a shared point if they share both
-   coordinates, so a single shared pivot is what guarantees the visual
-   crossing lands exactly there. `.readyBand` is declared first so
-   `.workBand` paints on top where they overlap. */
+   the pink overlay. `.ribbon` itself is just a normal-flow LAYOUT
+   placeholder (fixed height, sets how much vertical space the grid
+   below is pushed down by) — it does not clip anything itself and its
+   height/position never changes from what's declared here. */
 .ribbon {
   position: relative;
-  overflow: visible;
   height: clamp(140px, 22vw, 260px);
   margin-bottom: clamp(24px, 5vw, 56px);
+}
+
+/* The bands' actual bleed lives in THIS separate absolutely-positioned
+   wrapper instead of directly in `.ribbon`, specifically so it can be
+   both genuinely horizontal-clipped AND tall enough to need no vertical
+   clipping at all, at the same time — the one combination `.work`
+   itself couldn't provide (see the long comment on `.work` above).
+   Being `position: absolute` means its extra height costs nothing:
+   absolutely-positioned content never expands a relatively-positioned
+   ancestor's own layout size, so `.ribbon`'s declared height above (and
+   everything below it in the grid) is completely unaffected by how
+   tall this wrapper actually is.
+   `top`/`bottom: -25vw` gives ~2-5x headroom over the band's own worst-
+   case rotated-bounding-box overflow at any realistic viewport (the
+   overflow amount scales with viewport width, same as the band's own
+   180%-of-`.ribbon` width does, so a vw-based margin scales with it too
+   — a fixed px margin would eventually run out at wide-enough
+   viewports). `overflow-x: hidden` here is the REAL (layout-containing,
+   not just paint-clipping) horizontal clip this section needs — see the
+   `.work` comment above for why `clip-path` couldn't be reused here.
+   `pointer-events: none` is defensive: this wrapper's box, being taller
+   than `.ribbon`'s own placeholder height, geometrically overlaps
+   About's bottom edge above and the grid below — since both are
+   `aria-hidden` decoration anyway, this guarantees it can never
+   intercept a click meant for real content near those edges. */
+.ribbonBleed {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -25vw;
+  bottom: -25vw;
+  overflow-x: hidden;
+  pointer-events: none;
 }
 
 .readyBand,

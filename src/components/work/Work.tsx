@@ -328,11 +328,13 @@ export default function Work() {
       <PinkPeak />
 
       <div className={styles.ribbon} aria-hidden="true">
-        <div className={styles.readyBand}>
-          <MarqueeTrack text={READY_TEXT} trackRef={readyTrackRef} />
-        </div>
-        <div className={styles.workBand}>
-          <MarqueeTrack text={WORK_TEXT} trackRef={workTrackRef} />
+        <div className={styles.ribbonBleed}>
+          <div className={styles.readyBand}>
+            <MarqueeTrack text={READY_TEXT} trackRef={readyTrackRef} />
+          </div>
+          <div className={styles.workBand}>
+            <MarqueeTrack text={WORK_TEXT} trackRef={workTrackRef} />
+          </div>
         </div>
       </div>
 
