@@ -63,7 +63,16 @@
    completely unchanged in pixels while everything else scaled, i.e. stuck
    at one size. width:33.7% reproduces the exact same pixel size the old
    height:56% gave at the 1440×801 reference frame, just driven by the
-   axis that actually varies. */
+   axis that actually varies.
+   Split into this anchor (position, never touched by GSAP) + `.burstEntrance`
+   below (what GSAP actually scales/fades) — same reasoning as `.boxAnchor`/
+   `.boxEntrance`: GSAP taking over `transform` on the SAME element that
+   also carries a percentage `translate(-50%,-50%)` is a real, documented
+   risk class (see [[r3f-css-gotchas]]) even where live measurement hasn't
+   caught it actually drifting on this specific element/GSAP version —
+   splitting it removes the risk entirely rather than relying on that not
+   changing later. `burstRef` (HeroDecor.tsx) is on `.burstEntrance`, not
+   this element. */
 .burstWrap {
   position: absolute;
   left: 28.9%;
@@ -76,19 +85,21 @@
   filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.18));
 }
 
+.burstEntrance {
+  width: 100%;
+  height: 100%;
+}
+
 .burstSvg {
   width: 100%;
   height: 100%;
 }
 
-/* Split into an anchor (position/rotate, never touched by GSAP) + an inner
-   SVG that GSAP scales/fades — GSAP taking over `transform` on an <svg>
-   ROOT element that also carries a percentage `translate(-50%,-50%)` bakes
-   that percentage into a fixed pixel offset the first time it runs, which
-   then drifts out of place on any later resize (confirmed: center jumped
-   from 31.2%/79% to 39.26%/87.35% after a resize with no reload). Plain
-   `<div>` anchors (.boxAnchor, .unboxAnchor, badges) don't have this bug —
-   only bare SVG roots do. */
+/* Split into this anchor (position/rotate, never touched by GSAP) +
+   `.buyEntrance` below (what GSAP scales/fades) — `buyRef` (HeroDecor.tsx)
+   is on `.buyEntrance`, not this element. See the `.burstWrap` comment
+   above for why this split matters even without a confirmed live drift on
+   this specific element. */
 .buyAnchor {
   position: absolute;
   left: 26.2%;
@@ -99,6 +110,11 @@
   filter: drop-shadow(1.5px 0 0 var(--ink-black)) drop-shadow(-1.5px 0 0 var(--ink-black))
     drop-shadow(0 1.5px 0 var(--ink-black)) drop-shadow(0 -1.5px 0 var(--ink-black))
     drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
+}
+
+.buyEntrance {
+  display: block;
+  width: 100%;
 }
 
 .buyGraphic {

@@ -270,11 +270,15 @@ const HeroDecor = forwardRef<HeroDecorHandle, HeroDecorProps>(function HeroDecor
         </div>
       </div>
 
-      <div className={styles.burstWrap} ref={burstRef}>
-        <Burst className={styles.burstSvg} />
+      <div className={styles.burstWrap}>
+        <div className={styles.burstEntrance} ref={burstRef}>
+          <Burst className={styles.burstSvg} />
+        </div>
       </div>
-      <div className={styles.buyAnchor} ref={buyRef}>
-        <BuyOneGetAll className={styles.buyGraphic} />
+      <div className={styles.buyAnchor}>
+        <div className={styles.buyEntrance} ref={buyRef}>
+          <BuyOneGetAll className={styles.buyGraphic} />
+        </div>
       </div>
 
       <div className={styles.unboxAnchor}>
