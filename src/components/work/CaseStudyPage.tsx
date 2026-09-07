@@ -141,7 +141,6 @@ export default function CaseStudyPage() {
         angle={20}
         stripeWidth={60}
         gap={60}
-        speed={20}
         style={{ position: 'absolute', inset: 0, zIndex: -1 }}
       />
       {/* Ink whose Figma position bleeds past the Job card's own left/right

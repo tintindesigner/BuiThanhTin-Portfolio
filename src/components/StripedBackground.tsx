@@ -16,13 +16,6 @@ interface StripedBackgroundProps {
   stripeWidth?: number
   /** Gap between stripes, in px (desktop reference — halved under 768px). */
   gap?: number
-  /**
-   * Unused — the stripes are static now (see the module comment below).
-   * Kept only so every existing call site (Hero/About/Work/Contact/
-   * Navbar's hover chip/LoadingScreen/CaseStudyPage) doesn't need editing
-   * just to drop a prop that no longer does anything.
-   */
-  speed?: number
   className?: string
   style?: CSSProperties
   children?: ReactNode

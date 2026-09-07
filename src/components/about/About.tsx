@@ -174,7 +174,6 @@ const About = forwardRef<AboutHandle>(function About(_props, ref) {
         angle={20}
         stripeWidth={60}
         gap={60}
-        speed={20}
         style={{ position: 'absolute', inset: 0 }}
       />
       <div className={styles.figure} ref={figureRef}>

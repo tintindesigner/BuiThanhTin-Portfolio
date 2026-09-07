@@ -178,10 +178,10 @@ function PinkPeak() {
   return (
     <div className={styles.pinkPeak} aria-hidden="true">
       <span className={styles.peakRight}>
-        <StripedBackground bg="var(--ink-pink)" stripe="var(--stripe-pink)" angle={20 + PEAK_RIGHT_ANGLE} stripeWidth={60} gap={60} speed={20} style={{ position: 'absolute', inset: 0 }} />
+        <StripedBackground bg="var(--ink-pink)" stripe="var(--stripe-pink)" angle={20 + PEAK_RIGHT_ANGLE} stripeWidth={60} gap={60} style={{ position: 'absolute', inset: 0 }} />
       </span>
       <span className={styles.peakLeft}>
-        <StripedBackground bg="var(--ink-pink)" stripe="var(--stripe-pink)" angle={20 + PEAK_LEFT_ANGLE} stripeWidth={60} gap={60} speed={20} style={{ position: 'absolute', inset: 0 }} />
+        <StripedBackground bg="var(--ink-pink)" stripe="var(--stripe-pink)" angle={20 + PEAK_LEFT_ANGLE} stripeWidth={60} gap={60} style={{ position: 'absolute', inset: 0 }} />
       </span>
     </div>
   )
@@ -319,7 +319,6 @@ export default function Work() {
         angle={20}
         stripeWidth={60}
         gap={60}
-        speed={20}
         style={{ position: 'absolute', top: '-4px', left: 0, right: 0, bottom: 0 }}
       />
 

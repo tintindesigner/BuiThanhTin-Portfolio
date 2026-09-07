@@ -158,7 +158,6 @@ export default function Navbar({ activeId = 'home' }: NavbarProps) {
                 angle={-15}
                 stripeWidth={12}
                 gap={10}
-                speed={2}
                 style={{ position: 'absolute', inset: 0, clipPath: HOVER_CHIP_CLIP_PATH }}
               />
             </div>
