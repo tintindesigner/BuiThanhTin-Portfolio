@@ -33,7 +33,6 @@ export default forwardRef<LiquidTransitionHandle>(function LiquidTransition(_pro
   const filterId = `liquid-wobble-${uid}`
   const maskId = `liquid-mask-${uid}`
   const patternId = `liquid-stripe-${uid}`
-  const patternRef = useRef<SVGPatternElement>(null)
   const overlayRef = useRef<SVGGElement>(null)
   const waveGroupRef = useRef<SVGGElement>(null)
   const displaceRef = useRef<SVGFEOffsetElement>(null)
@@ -55,36 +54,15 @@ export default forwardRef<LiquidTransitionHandle>(function LiquidTransition(_pro
     }
   }, [])
 
-  // Scrolling stripe pattern — same rAF-driven `patternTransform`
-  // technique as StripedBackground (see that file for why: SMIL/CSS
-  // background-position both have reliability issues here). Reimplemented
-  // inline rather than reusing the component since it needs to be a fill
-  // SOURCE for the masked rect below, not a standalone full-bleed layer.
-  // Coordinates are in the wave artwork's own native 1920x1080 space.
-  useEffect(() => {
-    const pattern = patternRef.current
-    if (!pattern) return
-    const w = 70
-    const gap = 70
-    const period = w + gap
-    const durationMs = 20000
-    const start = performance.now()
-    let rafId: number
-    const tick = (now: number) => {
-      const elapsed = (now - start) % durationMs
-      const offset = (elapsed / durationMs) * period
-      // rotate(-20), matching StripedBackground's `rotation = -angle` —
-      // this was wrongly `rotate(20)` (sign flipped) before, which made
-      // the liquid's stripes run the opposite diagonal from every other
-      // striped background on the site (Hero/About/Navbar all go through
-      // that same negation).
-      pattern.setAttribute('patternTransform', `rotate(-20) translate(${offset} 0)`)
-      rafId = requestAnimationFrame(tick)
-    }
-    rafId = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(rafId)
-  }, [])
-
+  // The stripe pattern is STATIC — just a fixed `patternTransform="rotate(-20)"`
+  // tilt (matching every other striped surface on the site, all of which
+  // went static 2026-09-07). It used to scroll via an rAF loop rewriting
+  // `patternTransform` every frame, but that ran from mount forever even
+  // though this whole overlay is `opacity: 0` except during the ~1s
+  // Hero->About transition — pure waste, and Safari specifically showed it
+  // as continuous render work. The rise/jiggle/edge-wobble motion during
+  // the transition itself is untouched; only the stripe drift is gone
+  // (imperceptible amid everything else moving in that one second).
   useImperativeHandle(ref, () => ({
     play: (onCovered) =>
       new Promise((resolve) => {
@@ -166,7 +144,6 @@ export default forwardRef<LiquidTransitionHandle>(function LiquidTransition(_pro
           <feDisplacementMap in="SourceGraphic" in2="shiftedNoise" scale="130" xChannelSelector="R" yChannelSelector="G" />
         </filter>
         <pattern
-          ref={patternRef}
           id={patternId}
           patternUnits="userSpaceOnUse"
           width={140}
